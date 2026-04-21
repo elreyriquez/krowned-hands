@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { append } from "@/lib/bookings";
+import { append, readAll } from "@/lib/bookings";
 import { validateBooking } from "@/lib/validation";
 import { notifyNewBooking } from "@/lib/notify";
+import { isSlotBookable } from "@/lib/availability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,7 +19,28 @@ export async function POST(req: Request) {
   if (!result.ok) {
     return NextResponse.json(
       { message: "Please fix the highlighted fields.", errors: result.errors },
-      { status: 422 }
+      { status: 422 },
+    );
+  }
+
+  // Race-safe availability check: even if the client held onto a slot that
+  // was open seconds ago, re-run the overlap check against the authoritative
+  // store before writing.
+  const all = await readAll();
+  const stillOpen = isSlotBookable(
+    result.data.preferredDate,
+    result.data.preferredTime,
+    result.data.durationMinutes,
+    all,
+  );
+  if (!stillOpen) {
+    return NextResponse.json(
+      {
+        message:
+          "That time was just taken. Please pick another available slot, we held the rest for you.",
+        errors: { preferredTime: "Slot no longer available." },
+      },
+      { status: 409 },
     );
   }
 

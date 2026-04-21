@@ -75,7 +75,13 @@ export default async function AdminBookingsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div>{b.preferredDate}</div>
-                    <div className="text-xs text-[var(--kh-brown-soft)]">{b.preferredWindow}</div>
+                    <div className="text-xs text-[var(--kh-brown-soft)]">
+                      {b.preferredTime
+                        ? `${b.preferredTime}${
+                            b.preferredWindow ? ` · ${b.preferredWindow}` : ""
+                          }`
+                        : b.preferredWindow || "—"}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="capitalize">{b.area.replace("-", " ")}</div>

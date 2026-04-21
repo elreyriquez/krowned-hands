@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function BookPage() {
   const services = publicServices();
   return (
-    <section className="kh-watercolor">
+    <section className="bg-white">
       <div className="mx-auto max-w-6xl px-5 md:px-8 pt-14 md:pt-20 pb-24">
         <div className="max-w-2xl">
           <span className="kh-badge">Reserve a session</span>

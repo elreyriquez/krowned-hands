@@ -1,13 +1,11 @@
 /**
- * Service catalog.
+ * Service catalog. Matches the offers shown on Jordan's live Calendly:
+ *   - Krowned Reset   (60 min)
+ *   - Krowned Restore (90 min)
+ *   - Krowned Renew   (120 min)
  *
- * The live Calendly page exposes service options and durations. Because
- * we can't see that page directly at build time, this catalog mirrors
- * common mobile-massage event types at the ~$150 anchor price referenced
- * in the growth action plan, with room for the owner to adjust in one place.
- *
- * To change pricing/durations, edit this file. Both the booking form
- * and the admin view read from here.
+ * Pricing and duration anchor the booking flow and the public marketing
+ * cards. Update here and both surfaces stay in sync.
  */
 
 export type Service = {
@@ -16,47 +14,39 @@ export type Service = {
   tagline: string;
   durationMinutes: number;
   priceUsd: number;
+  /** 2-line summary for cards and the booking selector. */
   description: string;
-  /** Hide from the public form but keep accepting via direct id (e.g. returning clients) */
+  /** Hide from the public form but keep accepting via direct id (returning clients). */
   hidden?: boolean;
 };
 
 export const SERVICES: Service[] = [
   {
-    id: "signature-60",
-    name: "Signature Session",
+    id: "krowned-reset-60",
+    name: "Krowned Reset",
     durationMinutes: 60,
     priceUsd: 150,
-    tagline: "The foundation.",
+    tagline: "Meet your body where it is.",
     description:
-      "A focused 60-minute session tailored to your body on the day, combining therapeutic pressure, breath, and nervous-system awareness.",
+      "A nervous-system-led, full-body session guided in real time by your body's signals. The right starting point for most first visits.",
   },
   {
-    id: "deep-recovery-90",
-    name: "Deep Recovery",
+    id: "krowned-restore-90",
+    name: "Krowned Restore",
     durationMinutes: 90,
     priceUsd: 210,
-    tagline: "Release what you've been carrying.",
+    tagline: "Unwind the week you've carried.",
     description:
-      "Ninety minutes of deeper work for tension patterns, training load, and long-standing holding. Firm, precise, restorative.",
+      "Ninety minutes of deeper therapeutic work for long-standing tension, training load, and travel days. Firm, precise, integrative.",
   },
   {
-    id: "nervous-system-reset-75",
-    name: "Nervous System Reset",
-    durationMinutes: 75,
-    priceUsd: 185,
-    tagline: "Down-regulate, then restore.",
+    id: "krowned-renew-120",
+    name: "Krowned Renew",
+    durationMinutes: 120,
+    priceUsd: 275,
+    tagline: "The full reset.",
     description:
-      "A slower, calming modality designed to move you out of fight-or-flight: long strokes, guided breath, and quiet.",
-  },
-  {
-    id: "couples-90",
-    name: "Couples Session",
-    durationMinutes: 90,
-    priceUsd: 360,
-    tagline: "Side by side.",
-    description:
-      "Two concurrent sessions for couples or close friends. Subject to availability. Please include a note if a second therapist is required.",
+      "Two hours of layered recovery and extended down-regulation. Full-body therapeutic work with space to truly land before you leave the table.",
   },
 ];
 

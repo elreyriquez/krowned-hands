@@ -28,7 +28,11 @@ export type BookingRecord = {
   address: string;
   addressNotes?: string;
   preferredDate: string; // YYYY-MM-DD
-  preferredWindow: string; // e.g. "9:00 AM - 12:00 PM"
+  /** 24h start time, "HH:MM". Authoritative for availability checks. */
+  preferredTime?: string;
+  /** Legacy free-text window (e.g. "Morning · 8:00 AM - 11:00 AM"). Kept so
+   *  older JSON records still render cleanly in admin / notifications. */
+  preferredWindow?: string;
   name: string;
   email: string;
   phone: string;

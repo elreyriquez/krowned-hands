@@ -1,4 +1,9 @@
 import { SERVICE_AREAS, findService } from "./services";
+import {
+  formatDisplayTime,
+  parseHHMM,
+  slotStartMinutes,
+} from "./availability";
 
 export type BookingInput = {
   serviceId?: string;
@@ -6,6 +11,9 @@ export type BookingInput = {
   address?: string;
   addressNotes?: string;
   preferredDate?: string;
+  /** "HH:MM" 24h. Preferred over `preferredWindow`. */
+  preferredTime?: string;
+  /** Legacy free-text window. Accepted for backward compat only. */
   preferredWindow?: string;
   name?: string;
   email?: string;
@@ -23,6 +31,7 @@ export type ValidatedBooking = {
   address: string;
   addressNotes?: string;
   preferredDate: string;
+  preferredTime: string;
   preferredWindow: string;
   name: string;
   email: string;
@@ -68,8 +77,12 @@ export function validateBooking(input: BookingInput): ValidationResult {
     if (picked < today) errors.preferredDate = "Pick today or a future date.";
   }
 
-  const preferredWindow = s(input.preferredWindow);
-  if (!preferredWindow) errors.preferredWindow = "Choose a preferred time window.";
+  const preferredTime = s(input.preferredTime);
+  const tMin = preferredTime ? parseHHMM(preferredTime) : null;
+  const validSlot = tMin != null && slotStartMinutes().includes(tMin);
+  if (!validSlot) {
+    errors.preferredTime = "Choose an available time slot.";
+  }
 
   const name = s(input.name);
   if (name.length < 2) errors.name = "Please share your name.";
@@ -84,21 +97,25 @@ export function validateBooking(input: BookingInput): ValidationResult {
     input.consent === true || input.consent === "on" || input.consent === "true";
   if (!consent) errors.consent = "Please acknowledge the booking terms.";
 
-  if (Object.keys(errors).length > 0 || !service) {
+  if (Object.keys(errors).length > 0 || !service || tMin == null) {
     return { ok: false, errors };
   }
+
+  const endMin = tMin + service.durationMinutes;
+  const preferredWindow = `${formatDisplayTime(tMin)} - ${formatDisplayTime(endMin)}`;
 
   return {
     ok: true,
     data: {
       serviceId,
-      serviceName: service!.name,
-      durationMinutes: service!.durationMinutes,
-      priceUsd: service!.priceUsd,
+      serviceName: service.name,
+      durationMinutes: service.durationMinutes,
+      priceUsd: service.priceUsd,
       area,
       address,
       addressNotes: s(input.addressNotes) || undefined,
       preferredDate,
+      preferredTime,
       preferredWindow,
       name,
       email,

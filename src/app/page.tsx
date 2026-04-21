@@ -365,7 +365,7 @@ export default function HomePage() {
               },
               {
                 q: "Do you offer couples or back-to-back sessions?",
-                a: "Yes. See the Couples Session above, or leave a note when booking for back-to-back sessions for a partner, family member, or guest.",
+                a: "Yes, by arrangement. Book the session you want for yourself and leave a note about a partner, family member, or guest. Jordan will confirm a back-to-back or concurrent option based on availability.",
               },
               {
                 q: "Is Krowned Hands a collective?",

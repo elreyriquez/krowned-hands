@@ -1,16 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Service } from "@/lib/services";
+import {
+  formatDisplayTime,
+  parseHHMM,
+  type Slot,
+} from "@/lib/availability";
 
 type Props = {
   services: Service[];
   areas: { id: string; label: string }[];
 };
 
-type Step = 0 | 1 | 2 | 3;
+type Step = 0 | 1 | 2 | 3 | 4;
 
 type FormState = {
   serviceId: string;
@@ -18,7 +23,7 @@ type FormState = {
   address: string;
   addressNotes: string;
   preferredDate: string;
-  preferredWindow: string;
+  preferredTime: string;
   name: string;
   email: string;
   phone: string;
@@ -26,17 +31,25 @@ type FormState = {
   consent: boolean;
 };
 
-const TIME_WINDOWS = [
-  "Morning · 8:00 AM - 11:00 AM",
-  "Midday · 11:00 AM - 2:00 PM",
-  "Afternoon · 2:00 PM - 5:00 PM",
-  "Evening · 5:00 PM - 8:00 PM",
-];
-
 function todayIso(): string {
   const d = new Date();
   d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
   return d.toISOString().slice(0, 10);
+}
+
+function formatTimeLabel(hhmm: string): string {
+  const m = parseHHMM(hhmm);
+  return m == null ? hhmm : formatDisplayTime(m);
+}
+
+function formatDateLong(iso: string): string {
+  if (!iso) return "";
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 export function BookingForm({ services, areas }: Props) {
@@ -54,7 +67,7 @@ export function BookingForm({ services, areas }: Props) {
     address: "",
     addressNotes: "",
     preferredDate: "",
-    preferredWindow: "",
+    preferredTime: "",
     name: "",
     email: "",
     phone: "",
@@ -83,13 +96,14 @@ export function BookingForm({ services, areas }: Props) {
     if (current === 0) {
       if (!form.serviceId) e.serviceId = "Please choose a session.";
     } else if (current === 1) {
-      if (!form.area) e.area = "Choose a service area.";
-      if (form.address.trim().length < 6) e.address = "A full address helps us plan the visit.";
       if (!form.preferredDate) e.preferredDate = "Pick a preferred date.";
       else if (new Date(form.preferredDate) < new Date(todayIso()))
         e.preferredDate = "Pick today or a future date.";
-      if (!form.preferredWindow) e.preferredWindow = "Choose a time window.";
+      if (!form.preferredTime) e.preferredTime = "Choose an available time slot.";
     } else if (current === 2) {
+      if (!form.area) e.area = "Choose a service area.";
+      if (form.address.trim().length < 6) e.address = "A full address helps us plan the visit.";
+    } else if (current === 3) {
       if (form.name.trim().length < 2) e.name = "Please share your name.";
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "A valid email please.";
       if (!/^[+()\-.\s\d]{7,}$/.test(form.phone)) e.phone = "A reachable phone number.";
@@ -100,7 +114,7 @@ export function BookingForm({ services, areas }: Props) {
 
   function goNext() {
     if (!validateStep(step)) return;
-    setStep((s) => (Math.min(3, s + 1) as Step));
+    setStep((s) => (Math.min(4, s + 1) as Step));
   }
   function goBack() {
     setStep((s) => (Math.max(0, s - 1) as Step));
@@ -127,7 +141,7 @@ export function BookingForm({ services, areas }: Props) {
         return;
       }
       setConfirmation({ id: data.id });
-      setStep(3);
+      setStep(4);
       router.replace("/book?confirmed=1", { scroll: true });
     } catch {
       setServerError("Network error. Please try again.");
@@ -153,22 +167,34 @@ export function BookingForm({ services, areas }: Props) {
             <StepService
               services={services}
               serviceId={form.serviceId}
-              onChange={(id) => update("serviceId", id)}
+              onChange={(id) => {
+                update("serviceId", id);
+                // Clear the time slot because durations differ; date is fine to keep.
+                if (form.preferredTime) update("preferredTime", "");
+              }}
               error={errors.serviceId}
             />
           )}
-          {step === 1 && (
-            <StepWhenWhere
-              form={form}
-              areas={areas}
+          {step === 1 && selectedService && (
+            <StepWhen
+              date={form.preferredDate}
+              time={form.preferredTime}
+              service={selectedService}
+              onDate={(d) => {
+                update("preferredDate", d);
+                update("preferredTime", "");
+              }}
+              onTime={(t) => update("preferredTime", t)}
               errors={errors}
-              update={update}
             />
           )}
           {step === 2 && (
+            <StepWhere form={form} areas={areas} errors={errors} update={update} />
+          )}
+          {step === 3 && (
             <StepContact form={form} errors={errors} update={update} />
           )}
-          {step === 3 && selectedService && (
+          {step === 4 && selectedService && (
             <StepReview
               form={form}
               service={selectedService}
@@ -187,7 +213,7 @@ export function BookingForm({ services, areas }: Props) {
             >
               ← Back
             </button>
-            {step < 3 ? (
+            {step < 4 ? (
               <button type="button" onClick={goNext} className="kh-btn kh-btn-primary">
                 Continue →
               </button>
@@ -213,7 +239,7 @@ export function BookingForm({ services, areas }: Props) {
 }
 
 function Stepper({ step }: { step: Step }) {
-  const labels = ["Session", "When & Where", "Your details", "Review"];
+  const labels = ["Session", "When", "Where", "Your details", "Review"];
   return (
     <ol className="flex items-center gap-3 text-xs tracking-[0.18em] uppercase text-[var(--kh-brown-soft)] overflow-x-auto">
       {labels.map((label, i) => {
@@ -257,7 +283,7 @@ function StepService({
     <fieldset>
       <legend className="font-serif text-2xl text-[var(--kh-brown)]">Choose your session</legend>
       <p className="mt-1 text-[var(--kh-brown-soft)]">
-        Unsure? The Signature Session is the right starting point for most first visits.
+        Unsure? The Krowned Reset is the right starting point for most first visits.
       </p>
       <div className="mt-6 grid gap-3">
         {services.map((s) => {
@@ -300,7 +326,166 @@ function StepService({
   );
 }
 
-function StepWhenWhere({
+function StepWhen({
+  date,
+  time,
+  service,
+  onDate,
+  onTime,
+  errors,
+}: {
+  date: string;
+  time: string;
+  service: Service;
+  onDate: (d: string) => void;
+  onTime: (t: string) => void;
+  errors: Record<string, string>;
+}) {
+  const [slots, setSlots] = useState<Slot[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadSlots = useCallback(
+    async (d: string) => {
+      if (!d) {
+        setSlots(null);
+        return;
+      }
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const url = `/api/availability?date=${encodeURIComponent(d)}&serviceId=${encodeURIComponent(service.id)}`;
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error(await res.text());
+        const data = (await res.json()) as { slots: Slot[] };
+        setSlots(data.slots);
+      } catch {
+        setLoadError("Couldn't load available times. Please try a different date.");
+        setSlots(null);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [service.id],
+  );
+
+  useEffect(() => {
+    loadSlots(date);
+  }, [date, loadSlots]);
+
+  const availableCount = slots?.filter((s) => s.available).length ?? 0;
+
+  return (
+    <fieldset className="grid gap-6">
+      <div>
+        <legend className="font-serif text-2xl text-[var(--kh-brown)]">Pick your day and time</legend>
+        <p className="mt-1 text-[var(--kh-brown-soft)]">
+          {service.name} · {service.durationMinutes} minutes. Jordan books quickly, so grab a slot
+          that works before you fill out the rest.
+        </p>
+      </div>
+
+      <div>
+        <label className="kh-label" htmlFor="preferredDate">Preferred date</label>
+        <input
+          id="preferredDate"
+          type="date"
+          className="kh-input max-w-xs"
+          min={todayIso()}
+          value={date}
+          onChange={(e) => onDate(e.target.value)}
+        />
+        {errors.preferredDate ? <p className="kh-error">{errors.preferredDate}</p> : null}
+      </div>
+
+      <div>
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="kh-label !mb-0">Available times</span>
+          {date ? (
+            <span className="text-xs text-[var(--kh-brown-soft)]">
+              {loading
+                ? "Checking Jordan's calendar…"
+                : slots
+                ? `${availableCount} open · ${formatDateLong(date)}`
+                : ""}
+            </span>
+          ) : null}
+        </div>
+        <div className="mt-2 min-h-[140px]">
+          {!date ? (
+            <p className="text-sm text-[var(--kh-brown-soft)]">
+              Pick a date above and we&rsquo;ll show the open windows.
+            </p>
+          ) : loadError ? (
+            <p className="kh-error">{loadError}</p>
+          ) : loading ? (
+            <SlotSkeleton />
+          ) : slots && availableCount === 0 ? (
+            <p className="text-sm text-[var(--kh-brown-soft)]">
+              Jordan is booked solid on this date. Try another day, weekends fill first.
+            </p>
+          ) : slots ? (
+            <div
+              role="radiogroup"
+              aria-label="Available time slots"
+              className="grid gap-2.5 [grid-template-columns:repeat(auto-fit,minmax(110px,1fr))]"
+            >
+              {slots.map((slot) => {
+                const selected = slot.time === time;
+                const disabled = !slot.available;
+                return (
+                  <button
+                    key={slot.time}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    disabled={disabled}
+                    onClick={() => onTime(slot.time)}
+                    title={
+                      disabled
+                        ? slot.reason === "booked"
+                          ? "Already booked"
+                          : slot.reason === "past"
+                          ? "Time has passed"
+                          : "Outside service hours"
+                        : undefined
+                    }
+                    className={[
+                      "relative rounded-full border px-3 py-2.5 text-sm font-medium transition",
+                      selected
+                        ? "border-[var(--kh-gold)] bg-[var(--kh-gold)] text-[var(--kh-brown)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--kh-gold)_25%,transparent)]"
+                        : disabled
+                        ? "border-[var(--kh-line)] bg-[color-mix(in_srgb,var(--kh-cream-soft)_40%,transparent)] text-[var(--kh-brown-soft)] line-through opacity-55 cursor-not-allowed"
+                        : "border-[var(--kh-line)] bg-[var(--kh-cream-soft)] text-[var(--kh-brown)] hover:border-[var(--kh-gold-deep)] hover:-translate-y-[1px]",
+                    ].join(" ")}
+                  >
+                    {formatTimeLabel(slot.time)}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+        {errors.preferredTime ? <p className="kh-error mt-2">{errors.preferredTime}</p> : null}
+      </div>
+    </fieldset>
+  );
+}
+
+function SlotSkeleton() {
+  return (
+    <div className="grid gap-2.5 [grid-template-columns:repeat(auto-fit,minmax(110px,1fr))]">
+      {Array.from({ length: 10 }).map((_, i) => (
+        <div
+          key={i}
+          className="h-10 rounded-full border border-[var(--kh-line)] bg-[var(--kh-cream-soft)] opacity-60 animate-pulse"
+        />
+      ))}
+    </div>
+  );
+}
+
+function StepWhere({
   form,
   areas,
   errors,
@@ -313,7 +498,7 @@ function StepWhenWhere({
 }) {
   return (
     <fieldset className="grid gap-5">
-      <legend className="font-serif text-2xl text-[var(--kh-brown)]">When & where</legend>
+      <legend className="font-serif text-2xl text-[var(--kh-brown)]">Where Jordan is coming to</legend>
       <div>
         <label className="kh-label" htmlFor="area">Service area</label>
         <select
@@ -353,36 +538,6 @@ function StepWhenWhere({
           value={form.addressNotes}
           onChange={(e) => update("addressNotes", e.target.value)}
         />
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <label className="kh-label" htmlFor="preferredDate">Preferred date</label>
-          <input
-            id="preferredDate"
-            type="date"
-            className="kh-input"
-            min={todayIso()}
-            value={form.preferredDate}
-            onChange={(e) => update("preferredDate", e.target.value)}
-          />
-          {errors.preferredDate ? <p className="kh-error">{errors.preferredDate}</p> : null}
-        </div>
-        <div>
-          <label className="kh-label" htmlFor="preferredWindow">Preferred time window</label>
-          <select
-            id="preferredWindow"
-            className="kh-select"
-            value={form.preferredWindow}
-            onChange={(e) => update("preferredWindow", e.target.value)}
-          >
-            <option value="">Select a window…</option>
-            {TIME_WINDOWS.map((w) => (
-              <option key={w} value={w}>{w}</option>
-            ))}
-          </select>
-          {errors.preferredWindow ? <p className="kh-error">{errors.preferredWindow}</p> : null}
-        </div>
       </div>
     </fieldset>
   );
@@ -467,12 +622,18 @@ function StepReview({
   error?: string;
 }) {
   const areaLabel = areas.find((a) => a.id === form.area)?.label || form.area;
+  const tMin = parseHHMM(form.preferredTime);
+  const window =
+    tMin != null
+      ? `${formatDisplayTime(tMin)} – ${formatDisplayTime(tMin + service.durationMinutes)}`
+      : form.preferredTime || "-";
   const rows: [string, string | undefined][] = [
     ["Session", `${service.name} · ${service.durationMinutes} min · $${service.priceUsd}`],
+    ["Date", formatDateLong(form.preferredDate) || form.preferredDate],
+    ["Time", window],
     ["Area", areaLabel],
     ["Address", form.address],
     ["Arrival notes", form.addressNotes || "-"],
-    ["Preferred", `${form.preferredDate} · ${form.preferredWindow}`],
     ["Name", form.name],
     ["Email", form.email],
     ["Phone", form.phone],
@@ -522,6 +683,15 @@ function Summary({
   areas: { id: string; label: string }[];
 }) {
   const areaLabel = areas.find((a) => a.id === form.area)?.label || "-";
+  const tMin = parseHHMM(form.preferredTime);
+  const whenLine =
+    form.preferredDate && tMin != null && service
+      ? `${formatDateLong(form.preferredDate)} · ${formatDisplayTime(tMin)} – ${formatDisplayTime(
+          tMin + service.durationMinutes,
+        )}`
+      : form.preferredDate
+      ? formatDateLong(form.preferredDate)
+      : "-";
   return (
     <div className="kh-dark-card sticky top-24">
       <p className="text-[var(--kh-gold-deep)] text-xs tracking-[0.22em] uppercase">
@@ -536,9 +706,9 @@ function Summary({
         </p>
       ) : null}
       <dl className="mt-6 space-y-3 text-sm">
+        <Row k="When" v={whenLine} />
         <Row k="Area" v={areaLabel} />
         <Row k="Address" v={form.address || "-"} />
-        <Row k="When" v={form.preferredDate ? `${form.preferredDate} · ${form.preferredWindow || "-"}` : "-"} />
         <Row k="Name" v={form.name || "-"} />
       </dl>
       <hr className="kh-gold-rule my-6 !w-full" style={{ width: "100%" }} />

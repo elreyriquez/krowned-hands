@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { QuoteCurrencyToggle } from "@/components/QuoteCurrencyToggle";
+import { useQuoteCurrency } from "@/components/CurrencyProvider";
 import type { Service } from "@/lib/services";
 import {
   formatDisplayTime,
   parseHHMM,
   type Slot,
 } from "@/lib/availability";
+import { type QuoteCurrency, dualPriceLabels, sessionPriceLine } from "@/lib/pricing";
 
 type Props = {
   services: Service[];
@@ -54,6 +57,7 @@ function formatDateLong(iso: string): string {
 
 export function BookingForm({ services, areas }: Props) {
   const router = useRouter();
+  const { currency } = useQuoteCurrency();
   const params = useSearchParams();
   const initialService = useMemo(() => {
     const fromQuery = params.get("service") || "";
@@ -131,7 +135,7 @@ export function BookingForm({ services, areas }: Props) {
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, quoteCurrency: currency }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -154,18 +158,27 @@ export function BookingForm({ services, areas }: Props) {
   }
 
   return (
-    <div className="grid lg:grid-cols-12 gap-10">
-      <div className="lg:col-span-8">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="col-span-full flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
         <Stepper step={step} />
-        {serverError ? (
-          <p role="alert" className="mt-6 kh-error">
-            {serverError}
+        <div className="shrink-0">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--kh-brown-soft)] mb-2">
+            Quote in
           </p>
-        ) : null}
-        <div className="mt-8 kh-dark-card">
+          <QuoteCurrencyToggle />
+        </div>
+      </div>
+      {serverError ? (
+        <p role="alert" className="col-span-full kh-error">
+          {serverError}
+        </p>
+      ) : null}
+      <div className="lg:col-span-8">
+        <div className="kh-dark-card">
           {step === 0 && (
             <StepService
               services={services}
+              currency={currency}
               serviceId={form.serviceId}
               onChange={(id) => {
                 update("serviceId", id);
@@ -197,6 +210,7 @@ export function BookingForm({ services, areas }: Props) {
           {step === 4 && selectedService && (
             <StepReview
               form={form}
+              currency={currency}
               service={selectedService}
               areas={areas}
               onConsent={(v) => update("consent", v)}
@@ -232,7 +246,7 @@ export function BookingForm({ services, areas }: Props) {
       </div>
 
       <aside className="lg:col-span-4">
-        <Summary form={form} service={selectedService} areas={areas} />
+        <Summary form={form} currency={currency} service={selectedService} areas={areas} />
       </aside>
     </div>
   );
@@ -241,14 +255,14 @@ export function BookingForm({ services, areas }: Props) {
 function Stepper({ step }: { step: Step }) {
   const labels = ["Session", "When", "Where", "Your details", "Review"];
   return (
-    <ol className="flex items-center gap-3 text-xs tracking-[0.18em] uppercase text-[var(--kh-brown-soft)] overflow-x-auto">
+    <ol className="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs tracking-[0.14em] sm:tracking-[0.18em] uppercase text-[var(--kh-brown-soft)]">
       {labels.map((label, i) => {
         const active = i === step;
         const done = i < step;
         return (
-          <li key={label} className="flex items-center gap-3 whitespace-nowrap">
+          <li key={label} className="flex items-center gap-2 sm:gap-3 shrink-0">
             <span
-              className={`inline-flex h-7 w-7 items-center justify-center rounded-full border text-[11px] ${
+              className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[11px] ${
                 active
                   ? "bg-[var(--kh-brown)] text-[var(--kh-cream)] border-[var(--kh-brown)]"
                   : done
@@ -260,7 +274,7 @@ function Stepper({ step }: { step: Step }) {
               {i + 1}
             </span>
             <span className={active ? "text-[var(--kh-brown)]" : ""}>{label}</span>
-            {i < labels.length - 1 ? <span className="mx-2 opacity-40">/</span> : null}
+            {i < labels.length - 1 ? <span className="mx-1 sm:mx-2 opacity-40 select-none">/</span> : null}
           </li>
         );
       })}
@@ -270,11 +284,13 @@ function Stepper({ step }: { step: Step }) {
 
 function StepService({
   services,
+  currency,
   serviceId,
   onChange,
   error,
 }: {
   services: Service[];
+  currency: QuoteCurrency;
   serviceId: string;
   onChange: (id: string) => void;
   error?: string;
@@ -288,6 +304,7 @@ function StepService({
       <div className="mt-6 grid gap-3">
         {services.map((s) => {
           const selected = s.id === serviceId;
+          const { primary, secondary } = dualPriceLabels(s, currency);
           return (
             <label
               key={s.id}
@@ -306,9 +323,12 @@ function StepService({
                 className="mt-1.5 accent-[var(--kh-brown)]"
               />
               <div className="flex-1">
-                <div className="flex items-baseline justify-between gap-4">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                   <p className="font-serif text-xl text-[var(--kh-brown)]">{s.name}</p>
-                  <p className="font-serif text-lg text-[var(--kh-gold-deep)]">${s.priceUsd}</p>
+                  <div className="text-right shrink-0">
+                    <p className="font-serif text-lg text-[var(--kh-gold-deep)]">{primary}</p>
+                    <p className="text-xs text-[var(--kh-brown-soft)]">{secondary}</p>
+                  </div>
                 </div>
                 <p className="text-xs tracking-[0.18em] uppercase text-[var(--kh-gold-deep)] mt-1">
                   {s.durationMinutes} minutes · {s.tagline}
@@ -610,12 +630,14 @@ function StepContact({
 
 function StepReview({
   form,
+  currency,
   service,
   areas,
   onConsent,
   error,
 }: {
   form: FormState;
+  currency: QuoteCurrency;
   service: Service;
   areas: { id: string; label: string }[];
   onConsent: (v: boolean) => void;
@@ -628,7 +650,7 @@ function StepReview({
       ? `${formatDisplayTime(tMin)} – ${formatDisplayTime(tMin + service.durationMinutes)}`
       : form.preferredTime || "-";
   const rows: [string, string | undefined][] = [
-    ["Session", `${service.name} · ${service.durationMinutes} min · $${service.priceUsd}`],
+    ["Session", `${service.name} · ${service.durationMinutes} min · ${sessionPriceLine(service, currency)}`],
     ["Date", formatDateLong(form.preferredDate) || form.preferredDate],
     ["Time", window],
     ["Area", areaLabel],
@@ -675,10 +697,12 @@ function StepReview({
 
 function Summary({
   form,
+  currency,
   service,
   areas,
 }: {
   form: FormState;
+  currency: QuoteCurrency;
   service?: Service;
   areas: { id: string; label: string }[];
 }) {
@@ -702,7 +726,7 @@ function Summary({
       </h3>
       {service ? (
         <p className="mt-1 text-[var(--kh-brown-soft)]">
-          {service.durationMinutes} min · ${service.priceUsd} USD
+          {service.durationMinutes} min · {sessionPriceLine(service, currency)}
         </p>
       ) : null}
       <dl className="mt-6 space-y-3 text-sm">

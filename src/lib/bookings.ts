@@ -24,6 +24,10 @@ export type BookingRecord = {
   serviceName: string;
   durationMinutes: number;
   priceUsd: number;
+  /** Fixed list price in JMD at booking time (optional on legacy records). */
+  priceJmd?: number;
+  /** Which currency toggle the client had selected when submitting. */
+  quoteCurrency?: "usd" | "jmd";
   area: string;
   address: string;
   addressNotes?: string;
@@ -64,7 +68,7 @@ export async function readAll(): Promise<BookingRecord[]> {
 }
 
 export async function append(
-  data: Omit<BookingRecord, "id" | "createdAt" | "status">
+  data: Omit<BookingRecord, "id" | "createdAt" | "status">,
 ): Promise<BookingRecord> {
   await ensureStore();
   const record: BookingRecord = {

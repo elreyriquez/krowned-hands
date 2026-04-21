@@ -1,4 +1,5 @@
 import type { BookingRecord } from "./bookings";
+import { formatJmd, formatUsd } from "./pricing";
 
 /**
  * Best-effort notification hook. Supports two optional paths:
@@ -33,8 +34,14 @@ async function sendResendEmail(record: BookingRecord): Promise<void> {
   const when =
     record.preferredWindow ||
     (record.preferredTime ? `${record.preferredTime}` : "TBD");
+  const priceLine =
+    record.priceJmd != null
+      ? `${formatUsd(record.priceUsd)} · ${formatJmd(record.priceJmd)}${
+          record.quoteCurrency === "jmd" ? " (client viewed JMD)" : ""
+        }`
+      : `${formatUsd(record.priceUsd)}`;
   const body = [
-    `${record.name} requested a ${record.serviceName} (${record.durationMinutes} min).`,
+    `${record.name} requested a ${record.serviceName} (${record.durationMinutes} min). ${priceLine}.`,
     `Area: ${record.area}`,
     `Address: ${record.address}${record.addressNotes ? ` (${record.addressNotes})` : ""}`,
     `Preferred: ${record.preferredDate} · ${when}`,

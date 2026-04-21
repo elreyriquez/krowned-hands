@@ -15,6 +15,8 @@ export type BookingInput = {
   preferredTime?: string;
   /** Legacy free-text window. Accepted for backward compat only. */
   preferredWindow?: string;
+  /** Which currency the client had selected in the UI ("usd" | "jmd"). */
+  quoteCurrency?: string;
   name?: string;
   email?: string;
   phone?: string;
@@ -27,6 +29,9 @@ export type ValidatedBooking = {
   serviceName: string;
   durationMinutes: number;
   priceUsd: number;
+  priceJmd: number;
+  /** Primary quote surface at submit time. */
+  quoteCurrency: "usd" | "jmd";
   area: string;
   address: string;
   addressNotes?: string;
@@ -97,6 +102,9 @@ export function validateBooking(input: BookingInput): ValidationResult {
     input.consent === true || input.consent === "on" || input.consent === "true";
   if (!consent) errors.consent = "Please acknowledge the booking terms.";
 
+  const qcRaw = s(input.quoteCurrency).toLowerCase();
+  const quoteCurrency: "usd" | "jmd" = qcRaw === "jmd" ? "jmd" : "usd";
+
   if (Object.keys(errors).length > 0 || !service || tMin == null) {
     return { ok: false, errors };
   }
@@ -111,6 +119,8 @@ export function validateBooking(input: BookingInput): ValidationResult {
       serviceName: service.name,
       durationMinutes: service.durationMinutes,
       priceUsd: service.priceUsd,
+      priceJmd: service.priceJmd,
+      quoteCurrency,
       area,
       address,
       addressNotes: s(input.addressNotes) || undefined,

@@ -71,6 +71,8 @@ export default async function AdminBookingsPage() {
                     <div className="font-medium text-[var(--kh-brown)]">{b.serviceName}</div>
                     <div className="text-xs text-[var(--kh-brown-soft)]">
                       {b.durationMinutes} min · ${b.priceUsd}
+                      {b.priceJmd != null ? ` · J$${b.priceJmd.toLocaleString("en-JM")}` : ""}
+                      {b.quoteCurrency === "jmd" ? " · viewed JMD" : ""}
                     </div>
                   </td>
                   <td className="px-4 py-3">

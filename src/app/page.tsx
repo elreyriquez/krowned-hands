@@ -1,13 +1,18 @@
 import Link from "next/link";
+import { HeroPriceStat } from "@/components/HeroPriceStat";
 import { MarketingPhoto } from "@/components/MarketingPhoto";
 import { PillarCard } from "@/components/PillarCard";
 import { FeaturedQuoteRotator } from "@/components/FeaturedQuoteRotator";
+import { QuoteCurrencyToggle } from "@/components/QuoteCurrencyToggle";
 import { Reveal } from "@/components/Reveal";
+import { SessionsPricingCards } from "@/components/SessionsPricingCards";
 import { FEATURED_ROTATING_ANONYMOUS, GOOGLE_TESTIMONIALS } from "@/lib/testimonials";
 import { publicServices } from "@/lib/services";
 
 export default function HomePage() {
   const services = publicServices();
+  const minUsd = Math.min(...services.map((s) => s.priceUsd));
+  const minJmd = Math.min(...services.map((s) => s.priceJmd));
   return (
     <>
       {/* ---------- HERO ---------- */}
@@ -37,20 +42,23 @@ export default function HomePage() {
                   Explore Services
                 </Link>
               </div>
-              <div className="mt-10 flex items-center gap-6 text-sm text-[var(--kh-brown-soft)]">
+              <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4 text-sm text-[var(--kh-brown-soft)]">
                 <div>
-                  <p className="font-serif text-2xl text-[var(--kh-brown)]">60-90<span className="text-base">min</span></p>
+                  <p className="font-serif text-2xl text-[var(--kh-brown)]">60-120<span className="text-base">min</span></p>
                   <p className="tracking-[0.18em] uppercase text-xs mt-1">Session length</p>
                 </div>
-                <div className="h-8 w-px bg-[var(--kh-line)]" />
+                <div className="h-8 w-px bg-[var(--kh-line)] hidden sm:block" />
                 <div>
                   <p className="font-serif text-2xl text-[var(--kh-brown)]">In your space</p>
                   <p className="tracking-[0.18em] uppercase text-xs mt-1">Home · Hotel · Villa</p>
                 </div>
-                <div className="h-8 w-px bg-[var(--kh-line)] hidden sm:block" />
-                <div className="hidden sm:block">
-                  <p className="font-serif text-2xl text-[var(--kh-brown)]">From $150</p>
-                  <p className="tracking-[0.18em] uppercase text-xs mt-1">USD per session</p>
+                <div className="h-8 w-px bg-[var(--kh-line)] hidden md:block" />
+                <HeroPriceStat minUsd={minUsd} minJmd={minJmd} />
+                <div className="w-full sm:w-auto sm:ml-auto md:ml-0">
+                  <p className="tracking-[0.18em] uppercase text-xs mb-2 sm:mb-0 sm:inline sm:mr-3 sm:align-middle text-[var(--kh-brown-soft)]">
+                    Quote in
+                  </p>
+                  <QuoteCurrencyToggle className="align-middle" />
                 </div>
               </div>
             </Reveal>
@@ -143,55 +151,7 @@ export default function HomePage() {
             }}
           />
           <div className="relative mx-auto max-w-6xl px-5 md:px-8 py-20 md:py-28">
-            <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-              <div>
-                <span
-                  className="kh-badge w-fit shrink-0"
-                  style={{
-                    background: "transparent",
-                    color: "var(--kh-gold)",
-                    borderColor: "color-mix(in srgb, var(--kh-gold) 45%, transparent)",
-                  }}
-                >
-                  Sessions & investment
-                </span>
-                <h2 className="mt-4 max-w-xl font-serif text-3xl text-[var(--kh-cream)] md:text-4xl">
-                  Choose the session that meets you today.
-                </h2>
-              </div>
-              <Link href="/book" className="kh-btn kh-btn-gold self-start md:self-auto">
-                Start a booking
-              </Link>
-            </div>
-            <div className="mt-10 grid gap-5 md:grid-cols-2">
-              {services.map((s) => (
-                <article
-                  key={s.id}
-                  className="kh-service-card flex flex-col rounded-xl border border-white/10 bg-white/[0.03] p-6"
-                >
-                  <div className="flex items-baseline justify-between gap-6">
-                    <h3 className="font-serif text-2xl text-[var(--kh-cream)]">{s.name}</h3>
-                    <p className="font-serif text-xl text-[var(--kh-gold)]">${s.priceUsd}</p>
-                  </div>
-                  <p className="mt-1 text-sm uppercase tracking-[0.16em] text-[var(--kh-gold)]">
-                    {s.durationMinutes} minutes · {s.tagline}
-                  </p>
-                  <p className="mt-4 leading-relaxed text-[var(--kh-cream)]/85">{s.description}</p>
-                  <div className="mt-auto pt-6">
-                    <Link
-                      href={`/book?service=${s.id}`}
-                      className="text-sm text-[var(--kh-gold)] underline decoration-white/25 underline-offset-4 transition-colors hover:text-[var(--kh-cream)]"
-                    >
-                      Reserve this session →
-                    </Link>
-                  </div>
-                </article>
-              ))}
-            </div>
-            <p className="mt-6 text-sm text-[var(--kh-cream)]/70">
-              Prices are in USD. Travel within Kingston and Montego Bay is included; out-of-parish
-              travel may carry a small fee. We&rsquo;ll confirm before your visit.
-            </p>
+            <SessionsPricingCards services={services} />
           </div>
         </div>
       </section>

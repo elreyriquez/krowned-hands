@@ -22,14 +22,18 @@ export default function BookPage() {
               Our time.
             </span>
           </h1>
-          <p className="mt-4 text-[var(--kh-brown-soft)] leading-relaxed">
-            Share a few details to request your session. We&rsquo;ll confirm your window by message.
-            To lock your reservation, a 50% deposit is due within 24 hours of booking (bank details
-            below). Card payments are not processed on this site.
-          </p>
         </div>
 
-        <div className="mt-10 rounded-2xl border border-[var(--kh-line)] bg-[var(--kh-cream-soft)] p-6 md:p-8">
+        <div className="mt-10">
+          <Suspense fallback={<div className="kh-card">Loading booking form…</div>}>
+            <BookingForm
+              services={services}
+              areas={SERVICE_AREAS.map((a) => ({ id: a.id, label: a.label }))}
+            />
+          </Suspense>
+        </div>
+
+        <div className="mt-14 rounded-2xl border border-[var(--kh-line)] bg-[var(--kh-cream-soft)] p-6 md:p-8">
           <h2 className="font-serif text-2xl text-[var(--kh-brown)] md:text-3xl">
             Booking & payment
           </h2>
@@ -82,15 +86,6 @@ export default function BookPage() {
               <dd className="mt-1 text-[var(--kh-ink)]">UWI</dd>
             </div>
           </dl>
-        </div>
-
-        <div className="mt-10">
-          <Suspense fallback={<div className="kh-card">Loading booking form…</div>}>
-            <BookingForm
-              services={services}
-              areas={SERVICE_AREAS.map((a) => ({ id: a.id, label: a.label }))}
-            />
-          </Suspense>
         </div>
       </div>
     </section>

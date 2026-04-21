@@ -717,7 +717,7 @@ function Summary({
       ? formatDateLong(form.preferredDate)
       : "-";
   return (
-    <div className="kh-dark-card sticky top-24">
+    <div className="kh-dark-card lg:sticky lg:top-24">
       <p className="text-[var(--kh-gold-deep)] text-xs tracking-[0.22em] uppercase">
         Your reservation
       </p>

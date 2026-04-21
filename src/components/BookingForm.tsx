@@ -148,7 +148,7 @@ export function BookingForm({ services, areas }: Props) {
             {serverError}
           </p>
         ) : null}
-        <div className="mt-8 kh-card">
+        <div className="mt-8 kh-dark-card">
           {step === 0 && (
             <StepService
               services={services}
@@ -268,7 +268,7 @@ function StepService({
               className={`relative flex items-start gap-4 p-5 rounded-2xl border cursor-pointer transition ${
                 selected
                   ? "border-[var(--kh-gold)] bg-[color-mix(in_srgb,var(--kh-gold)_10%,var(--kh-cream-soft))]"
-                  : "border-[var(--kh-line)] bg-white/60 hover:border-[var(--kh-gold-deep)]"
+                  : "border-[var(--kh-line)] bg-[var(--kh-cream-soft)] hover:border-[var(--kh-gold-deep)]"
               }`}
             >
               <input
@@ -523,7 +523,7 @@ function Summary({
 }) {
   const areaLabel = areas.find((a) => a.id === form.area)?.label || "-";
   return (
-    <div className="kh-card sticky top-24">
+    <div className="kh-dark-card sticky top-24">
       <p className="text-[var(--kh-gold-deep)] text-xs tracking-[0.22em] uppercase">
         Your reservation
       </p>

@@ -209,6 +209,84 @@ body {
   padding: 1.75rem;
 }
 
+/* Dark themed card variant (matches the "In their words" band).
+   Overrides brand tokens inside its scope so that descendants written with
+   `text-[var(--kh-brown)]`, `border-[var(--kh-line)]`, etc. pick up dark values
+   automatically, while buttons are re-asserted with explicit colors. */
+.kh-dark-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--kh-charcoal);
+  color: var(--kh-cream);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+
+  --kh-brown: #f7efe2;
+  --kh-brown-soft: color-mix(in srgb, #f7efe2 82%, transparent);
+  --kh-ink: #f7efe2;
+  --kh-gold-deep: #c89a5b;
+  --kh-line: rgba(255, 255, 255, 0.12);
+  --kh-cream-soft: rgba(255, 255, 255, 0.06);
+  --kh-cream: #f7efe2;
+}
+.kh-dark-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background:
+    radial-gradient(50% 40% at 20% 30%, #d7a25a 0%, transparent 70%),
+    radial-gradient(50% 40% at 80% 80%, #d7a25a 0%, transparent 70%);
+  filter: blur(10px);
+}
+.kh-dark-card > * { position: relative; z-index: 1; }
+
+/* Inputs get a subtle elevated surface with cream text and a softer placeholder. */
+.kh-dark-card .kh-input,
+.kh-dark-card .kh-select,
+.kh-dark-card .kh-textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f7efe2;
+}
+.kh-dark-card .kh-input::placeholder,
+.kh-dark-card .kh-textarea::placeholder {
+  color: color-mix(in srgb, #f7efe2 55%, transparent);
+}
+.kh-dark-card .kh-input:focus,
+.kh-dark-card .kh-select:focus,
+.kh-dark-card .kh-textarea:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--kh-gold);
+}
+.kh-dark-card .kh-error { color: #ffb4a1; }
+.kh-dark-card .kh-link { color: var(--kh-gold); }
+.kh-dark-card .kh-link:hover { color: #f7efe2; }
+
+/* Buttons: re-assert explicit colors so the variable override above doesn't
+   paint them cream-on-cream. */
+.kh-dark-card .kh-btn-primary {
+  background: linear-gradient(180deg, #c89a5b, #b88a4a);
+  color: #3b2419;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15) inset,
+    0 6px 18px -10px rgba(0, 0, 0, 0.6);
+}
+.kh-dark-card .kh-btn-primary:hover {
+  background: linear-gradient(180deg, #d0a465, #c1945a);
+  filter: none;
+}
+.kh-dark-card .kh-btn-ghost {
+  background: transparent;
+  color: #f7efe2;
+  border: 1px solid rgba(247, 239, 226, 0.35);
+}
+.kh-dark-card .kh-btn-ghost:hover {
+  background: rgba(247, 239, 226, 0.08);
+  color: #f7efe2;
+}
+
 .kh-link {
   color: var(--kh-gold-deep);
   text-decoration: underline;
@@ -217,6 +295,96 @@ body {
 }
 .kh-link:hover { color: var(--kh-brown); }
 
+/* ---------- Scroll + micro animations ---------- */
+
+/* Base state for anything marked with data-kh-reveal (hidden until intersecting). */
+[data-kh-reveal] {
+  opacity: 0;
+  transition:
+    opacity 700ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 800ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: opacity, transform;
+}
+[data-kh-reveal="from-left"]  { transform: translate3d(-48px, 0, 0); }
+[data-kh-reveal="from-right"] { transform: translate3d(48px, 0, 0); }
+[data-kh-reveal="fade-up"]    { transform: translate3d(0, 24px, 0); }
+[data-kh-reveal="fade"]       { transform: none; }
+
+[data-kh-reveal][data-visible] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Word-by-word stagger: put inline-block spans inside an element with .kh-stagger.
+   Use inline style="--i: N" on each span to drive the delay. */
+.kh-stagger > span {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  transition:
+    opacity 600ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+[data-kh-reveal][data-visible] .kh-stagger > span {
+  opacity: 1;
+  transform: none;
+}
+
+/* Gentle breathe / stretch on a single phrase (used on "body work" in the hero). */
+@keyframes kh-breathe {
+  0%, 100% { transform: scaleX(1);    letter-spacing: 0; }
+  50%      { transform: scaleX(1.05); letter-spacing: 0.012em; }
+}
+.kh-stretch {
+  display: inline-block;
+  transform-origin: center;
+  animation: kh-breathe 4.8s ease-in-out infinite;
+}
+
+/* Hover glow for the service / investment cards on the dark band. */
+.kh-service-card {
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 320ms ease,
+    border-color 320ms ease,
+    background-color 320ms ease;
+}
+.kh-service-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--kh-gold) 55%, transparent);
+  background-color: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--kh-gold) 35%, transparent),
+    0 14px 44px -12px color-mix(in srgb, var(--kh-gold) 55%, transparent);
+}
+
+/* Sequential glow pulse for the "How it works" step numbers.
+   Put style="--i: N" on each number to stagger the pulse. */
+@keyframes kh-number-pulse {
+  0%   { text-shadow: 0 0 0 transparent; color: var(--kh-gold-deep); }
+  40%  {
+    text-shadow: 0 0 28px color-mix(in srgb, var(--kh-gold) 70%, transparent);
+    color: var(--kh-gold);
+  }
+  100% { text-shadow: 0 0 0 transparent; color: var(--kh-gold-deep); }
+}
+.kh-step-number {
+  color: var(--kh-gold-deep);
+  will-change: color, text-shadow;
+}
+[data-kh-reveal][data-visible] .kh-step-number {
+  animation: kh-number-pulse 1.8s ease-out both;
+  animation-delay: calc(var(--i, 0) * 520ms);
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+  [data-kh-reveal],
+  .kh-stagger > span,
+  .kh-step-number {
+    opacity: 1 !important;
+    transform: none !important;
+    text-shadow: none !important;
+  }
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MarketingPhoto } from "@/components/MarketingPhoto";
 import { PillarCard } from "@/components/PillarCard";
 import { FeaturedQuoteRotator } from "@/components/FeaturedQuoteRotator";
+import { Reveal } from "@/components/Reveal";
 import { FEATURED_ROTATING_ANONYMOUS, GOOGLE_TESTIMONIALS } from "@/lib/testimonials";
 import { publicServices } from "@/lib/services";
 
@@ -13,13 +14,13 @@ export default function HomePage() {
       <section className="kh-watercolor">
         <div className="mx-auto max-w-6xl px-5 md:px-8 pt-14 md:pt-24 pb-20 md:pb-28">
           <div className="grid md:grid-cols-12 gap-10 md:gap-12 items-center">
-            <div className="md:col-span-7">
+            <Reveal animation="from-left" className="md:col-span-7">
               <span className="kh-badge">Mobile Massage · Kingston & Montego Bay</span>
               <h1 className="mt-6 font-serif text-[var(--kh-brown)] text-4xl sm:text-5xl md:text-6xl leading-[1.05]">
                 Transformational
                 <br />
                 <span className="font-script text-[var(--kh-gold-deep)] text-5xl sm:text-6xl md:text-7xl leading-none block mt-2">
-                  body work
+                  <span className="kh-stretch">body work</span>
                 </span>
                 <span className="block mt-2">for how you actually live.</span>
               </h1>
@@ -52,8 +53,8 @@ export default function HomePage() {
                   <p className="tracking-[0.18em] uppercase text-xs mt-1">USD per session</p>
                 </div>
               </div>
-            </div>
-            <div className="md:col-span-5">
+            </Reveal>
+            <Reveal animation="from-right" delayMs={120} className="md:col-span-5">
               <MarketingPhoto
                 src="/brand/krowned-hands-images/jordan-hero-portrait.png"
                 alt="Jordan, therapeutic massage and bodywork, professional portrait"
@@ -61,7 +62,7 @@ export default function HomePage() {
                 sizes="(max-width: 768px) 100vw, 42vw"
                 priority
               />
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -72,48 +73,59 @@ export default function HomePage() {
         className="border-y border-[var(--kh-line)] bg-white"
       >
         <div className="mx-auto max-w-6xl px-5 md:px-8 py-20 md:py-28">
-          <div className="text-center max-w-2xl mx-auto">
+          <Reveal animation="fade" className="text-center max-w-2xl mx-auto">
             <span className="kh-badge">What the work is</span>
-            <h2 className="mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
-              Three pillars.<br className="hidden md:block" /> One intentional session.
+            <h2 className="kh-stagger mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
+              <span style={{ "--i": 0 } as React.CSSProperties}>Three</span>{" "}
+              <span style={{ "--i": 1 } as React.CSSProperties}>pillars.</span>
+              <br className="hidden md:block" />{" "}
+              <span style={{ "--i": 2 } as React.CSSProperties}>One</span>{" "}
+              <span style={{ "--i": 3 } as React.CSSProperties}>intentional</span>{" "}
+              <span style={{ "--i": 4 } as React.CSSProperties}>session.</span>
             </h2>
             <hr className="kh-gold-rule mx-auto my-6" />
             <p className="text-[var(--kh-brown-soft)] leading-relaxed">
               Every booking is tailored, but most sessions move through one of these three lenses.
               Tell us where you are today; we&rsquo;ll meet you there.
             </p>
-          </div>
+          </Reveal>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            <PillarCard
-              eyebrow="Pillar One"
-              title="Pain Relief"
-              body="Targeted, informed pressure for the places that need it most: neck, shoulders, lower back, hips. Acute tension, post-training, or chronic holding."
-              icon={
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <path d="M12 21s-7-4.35-7-10a5 5 0 019-3 5 5 0 019 3c0 5.65-7 10-7 10H12z" stroke="currentColor" strokeWidth="1.6" />
-                </svg>
-              }
-            />
-            <PillarCard
-              eyebrow="Pillar Two"
-              title="Deep Recovery"
-              body="Slower, firmer work for athletes, high-output professionals, and anyone rebuilding after travel, long hours, or training load."
-              icon={
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <path d="M4 12h4l3-7 4 14 3-7h2" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-                </svg>
-              }
-            />
-            <PillarCard
-              eyebrow="Pillar Three"
-              title="Nervous System Reset"
-              body="A calm, down-regulating modality: long strokes, breath, and quiet, designed to move you out of fight-or-flight before you leave the table."
-              icon={
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <path d="M3 12c3 0 3-4 6-4s3 8 6 8 3-4 6-4" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-                </svg>
-              }
-            />
+            <Reveal animation="from-left" delayMs={0}>
+              <PillarCard
+                eyebrow="Pillar One"
+                title="Pain Relief"
+                body="Targeted, informed pressure for the places that need it most: neck, shoulders, lower back, hips. Acute tension, post-training, or chronic holding."
+                icon={
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path d="M12 21s-7-4.35-7-10a5 5 0 019-3 5 5 0 019 3c0 5.65-7 10-7 10H12z" stroke="currentColor" strokeWidth="1.6" />
+                  </svg>
+                }
+              />
+            </Reveal>
+            <Reveal animation="from-left" delayMs={140}>
+              <PillarCard
+                eyebrow="Pillar Two"
+                title="Deep Recovery"
+                body="Slower, firmer work for athletes, high-output professionals, and anyone rebuilding after travel, long hours, or training load."
+                icon={
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path d="M4 12h4l3-7 4 14 3-7h2" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                  </svg>
+                }
+              />
+            </Reveal>
+            <Reveal animation="from-left" delayMs={280}>
+              <PillarCard
+                eyebrow="Pillar Three"
+                title="Nervous System Reset"
+                body="A calm, down-regulating modality: long strokes, breath, and quiet, designed to move you out of fight-or-flight before you leave the table."
+                icon={
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path d="M3 12c3 0 3-4 6-4s3 8 6 8 3-4 6-4" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+                  </svg>
+                }
+              />
+            </Reveal>
           </div>
         </div>
       </section>
@@ -155,7 +167,7 @@ export default function HomePage() {
               {services.map((s) => (
                 <article
                   key={s.id}
-                  className="flex flex-col rounded-xl border border-white/10 bg-white/[0.03] p-6"
+                  className="kh-service-card flex flex-col rounded-xl border border-white/10 bg-white/[0.03] p-6"
                 >
                   <div className="flex items-baseline justify-between gap-6">
                     <h3 className="font-serif text-2xl text-[var(--kh-cream)]">{s.name}</h3>
@@ -187,15 +199,15 @@ export default function HomePage() {
       {/* ---------- ABOUT JORDAN ---------- */}
       <section id="about" className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-28">
         <div className="grid md:grid-cols-12 gap-10 items-center">
-          <div className="md:col-span-5">
+          <Reveal animation="from-left" className="md:col-span-5">
             <MarketingPhoto
               src="/brand/krowned-hands-images/jordan-founder-image.png"
               alt="Jordan, founder of Krowned Hands, massage therapist"
               aspectClass="aspect-[4/5]"
               sizes="(max-width: 768px) 100vw, 40vw"
             />
-          </div>
-          <div className="md:col-span-7">
+          </Reveal>
+          <Reveal animation="from-right" delayMs={120} className="md:col-span-7">
             <span className="kh-badge">Meet your therapist</span>
             <h2 className="mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
               Jordan, founder of Krowned Hands.
@@ -225,7 +237,7 @@ export default function HomePage() {
                 <p className="text-[var(--kh-brown-soft)]">Locals · Tourists · Athletes.</p>
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -239,31 +251,38 @@ export default function HomePage() {
             </h2>
             <hr className="kh-gold-rule mx-auto my-6" />
           </div>
-          <ol className="mt-12 grid list-none gap-6 md:grid-cols-3">
-            {[
-              {
-                step: "01",
-                title: "Reserve your session",
-                body: "Share your preferred date, service area, and the space we'll be working in. We'll confirm by message.",
-              },
-              {
-                step: "02",
-                title: "We come to you",
-                body: "Jordan arrives with the full set-up: table, linens, oils, music. You choose the room. We take care of the rest.",
-              },
-              {
-                step: "03",
-                title: "Rest, then reset",
-                body: "After your session, you stay put. You get a short aftercare note by email within 24 hours.",
-              },
-            ].map((s) => (
-              <li key={s.step} className="kh-card">
-                <p className="font-serif text-4xl text-[var(--kh-gold-deep)]">{s.step}</p>
-                <h3 className="mt-3 font-serif text-xl text-[var(--kh-brown)]">{s.title}</h3>
-                <p className="mt-2 leading-relaxed text-[var(--kh-brown-soft)]">{s.body}</p>
-              </li>
-            ))}
-          </ol>
+          <Reveal animation="fade" threshold={0.25}>
+            <ol className="mt-12 grid list-none gap-6 md:grid-cols-3">
+              {[
+                {
+                  step: "01",
+                  title: "Reserve your session",
+                  body: "Share your preferred date, service area, and the space we'll be working in. We'll confirm by message.",
+                },
+                {
+                  step: "02",
+                  title: "We come to you",
+                  body: "Jordan arrives with the full set-up: table, linens, oils, music. You choose the room. We take care of the rest.",
+                },
+                {
+                  step: "03",
+                  title: "Rest, then reset",
+                  body: "After your session, you stay put. You get a short aftercare note by email within 24 hours.",
+                },
+              ].map((s, i) => (
+                <li key={s.step} className="kh-card">
+                  <p
+                    className="kh-step-number font-serif text-4xl"
+                    style={{ "--i": i } as React.CSSProperties}
+                  >
+                    {s.step}
+                  </p>
+                  <h3 className="mt-3 font-serif text-xl text-[var(--kh-brown)]">{s.title}</h3>
+                  <p className="mt-2 leading-relaxed text-[var(--kh-brown-soft)]">{s.body}</p>
+                </li>
+              ))}
+            </ol>
+          </Reveal>
         </div>
       </section>
 
@@ -295,17 +314,21 @@ export default function HomePage() {
             </div>
             <div className="grid w-full max-w-full shrink-0 grid-cols-1 gap-[1.15rem] md:col-span-12 md:grid-cols-3 md:gap-[1.15rem] lg:gap-5">
               {GOOGLE_TESTIMONIALS.map((t, index) => (
-                <figure
+                <Reveal
                   key={index}
-                  className="flex h-full min-h-0 flex-col justify-between rounded-xl border border-white/10 bg-white/[0.03] p-[1.15rem] sm:p-6"
+                  animation="fade-up"
+                  delayMs={index * 130}
+                  className="h-full"
                 >
-                  <p className="min-h-0 flex-1 text-base leading-relaxed text-[var(--kh-cream)]/85 italic">
-                    &ldquo;{t.quote}&rdquo;
-                  </p>
-                  <figcaption className="mt-[1.15rem] shrink-0 border-t border-white/10 pt-3.5 text-[11.5px] uppercase leading-snug tracking-[0.16em] text-[var(--kh-gold)] sm:text-xs">
-                    {t.attribution}
-                  </figcaption>
-                </figure>
+                  <figure className="flex h-full min-h-0 flex-col justify-between rounded-xl border border-white/10 bg-white/[0.03] p-[1.15rem] sm:p-6">
+                    <p className="min-h-0 flex-1 text-base leading-relaxed text-[var(--kh-cream)]/85 italic">
+                      &ldquo;{t.quote}&rdquo;
+                    </p>
+                    <figcaption className="mt-[1.15rem] shrink-0 border-t border-white/10 pt-3.5 text-[11.5px] uppercase leading-snug tracking-[0.16em] text-[var(--kh-gold)] sm:text-xs">
+                      {t.attribution}
+                    </figcaption>
+                  </figure>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -372,7 +395,7 @@ export default function HomePage() {
           />
           <div className="relative mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-24">
             <div className="grid items-center gap-8 md:grid-cols-12">
-              <div className="md:col-span-8">
+              <Reveal animation="from-left" className="md:col-span-8">
                 <h2 className="font-serif text-3xl leading-tight text-[var(--kh-cream)] md:text-5xl">
                   Ready when you are.
                 </h2>
@@ -380,12 +403,16 @@ export default function HomePage() {
                   Reserve your first session in under two minutes. We&rsquo;ll follow up personally
                   to confirm your window.
                 </p>
-              </div>
-              <div className="md:col-span-4 md:text-right">
+              </Reveal>
+              <Reveal
+                animation="from-right"
+                delayMs={140}
+                className="md:col-span-4 md:text-right"
+              >
                 <Link href="/book" className="kh-btn kh-btn-gold">
                   Reserve Your Session
                 </Link>
-              </div>
+              </Reveal>
             </div>
           </div>
         </div>

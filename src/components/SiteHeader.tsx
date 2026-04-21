@@ -3,7 +3,7 @@ import { BrandLogo } from "./BrandLogo";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-[color-mix(in_srgb,var(--kh-cream)_82%,transparent)] border-b border-[var(--kh-line)]">
+    <header className="sticky top-0 z-40 bg-white border-b border-[var(--kh-line)] shadow-sm">
       <div className="mx-auto max-w-6xl px-5 md:px-8 min-h-[4.75rem] py-2.5 flex items-center justify-between gap-4">
         <BrandLogo variant="header" />
         <nav aria-label="Primary" className="hidden md:flex items-center gap-8 text-sm text-[var(--kh-brown-soft)]">

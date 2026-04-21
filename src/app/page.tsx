@@ -67,49 +67,54 @@ export default function HomePage() {
       </section>
 
       {/* ---------- PILLARS ---------- */}
-      <section id="services" className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-28">
-        <div className="text-center max-w-2xl mx-auto">
-          <span className="kh-badge">What the work is</span>
-          <h2 className="mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
-            Three pillars.<br className="hidden md:block" /> One intentional session.
-          </h2>
-          <hr className="kh-gold-rule mx-auto my-6" />
-          <p className="text-[var(--kh-brown-soft)] leading-relaxed">
-            Every booking is tailored — but most sessions move through one of these three lenses.
-            Tell us where you are today; we&rsquo;ll meet you there.
-          </p>
-        </div>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          <PillarCard
-            eyebrow="Pillar One"
-            title="Pain Relief"
-            body="Targeted, informed pressure for the places that need it most — neck, shoulders, lower back, hips. Acute tension, post-training, or chronic holding."
-            icon={
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <path d="M12 21s-7-4.35-7-10a5 5 0 019-3 5 5 0 019 3c0 5.65-7 10-7 10H12z" stroke="currentColor" strokeWidth="1.6" />
-              </svg>
-            }
-          />
-          <PillarCard
-            eyebrow="Pillar Two"
-            title="Deep Recovery"
-            body="Slower, firmer work for athletes, high-output professionals, and anyone rebuilding after travel, long hours, or training load."
-            icon={
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <path d="M4 12h4l3-7 4 14 3-7h2" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-              </svg>
-            }
-          />
-          <PillarCard
-            eyebrow="Pillar Three"
-            title="Nervous System Reset"
-            body="A calm, down-regulating modality — long strokes, breath, quiet — designed to move you out of fight-or-flight before you leave the table."
-            icon={
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <path d="M3 12c3 0 3-4 6-4s3 8 6 8 3-4 6-4" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-              </svg>
-            }
-          />
+      <section
+        id="services"
+        className="border-y border-[var(--kh-line)] bg-white"
+      >
+        <div className="mx-auto max-w-6xl px-5 md:px-8 py-20 md:py-28">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="kh-badge">What the work is</span>
+            <h2 className="mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
+              Three pillars.<br className="hidden md:block" /> One intentional session.
+            </h2>
+            <hr className="kh-gold-rule mx-auto my-6" />
+            <p className="text-[var(--kh-brown-soft)] leading-relaxed">
+              Every booking is tailored — but most sessions move through one of these three lenses.
+              Tell us where you are today; we&rsquo;ll meet you there.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            <PillarCard
+              eyebrow="Pillar One"
+              title="Pain Relief"
+              body="Targeted, informed pressure for the places that need it most — neck, shoulders, lower back, hips. Acute tension, post-training, or chronic holding."
+              icon={
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <path d="M12 21s-7-4.35-7-10a5 5 0 019-3 5 5 0 019 3c0 5.65-7 10-7 10H12z" stroke="currentColor" strokeWidth="1.6" />
+                </svg>
+              }
+            />
+            <PillarCard
+              eyebrow="Pillar Two"
+              title="Deep Recovery"
+              body="Slower, firmer work for athletes, high-output professionals, and anyone rebuilding after travel, long hours, or training load."
+              icon={
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <path d="M4 12h4l3-7 4 14 3-7h2" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                </svg>
+              }
+            />
+            <PillarCard
+              eyebrow="Pillar Three"
+              title="Nervous System Reset"
+              body="A calm, down-regulating modality — long strokes, breath, quiet — designed to move you out of fight-or-flight before you leave the table."
+              icon={
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <path d="M3 12c3 0 3-4 6-4s3 8 6 8 3-4 6-4" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+                </svg>
+              }
+            />
+          </div>
         </div>
       </section>
 

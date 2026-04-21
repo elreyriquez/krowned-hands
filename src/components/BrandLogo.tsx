@@ -9,8 +9,8 @@ type Props = {
 
 /**
  * Expect true PNG/WebP/SVG assets with transparency. Quick check from project root:
- * `file public/brand/logo-mark.png` — must say “PNG image” (starts with PNG magic bytes).
- * If it says “JPEG image data”, the file was saved as JPG with a `.png` name — JPEG cannot
+ * `file public/brand/logo-mark.png` must say "PNG image" (starts with PNG magic bytes).
+ * If it says "JPEG image data", the file was saved as JPG with a `.png` name. JPEG cannot
  * carry transparency, so any black backing is baked into the pixels (not Next.js or CSS).
  */
 export function BrandLogo({ variant = "header", className = "" }: Props) {
@@ -20,7 +20,7 @@ export function BrandLogo({ variant = "header", className = "" }: Props) {
     <Link
       href="/"
       className={`group inline-flex flex-col items-center gap-2 sm:flex-row sm:items-center sm:gap-3 ${className}`}
-      aria-label="Krowned Hands — home"
+      aria-label="Krowned Hands, home"
     >
       <Image
         src="/brand/logo-mark.png"

@@ -11,7 +11,7 @@ type Props = {
 };
 
 /**
- * Full-bleed crop inside a rounded frame — matches previous ImagePlaceholder layout slots.
+ * Full-bleed crop inside a rounded frame (matches previous ImagePlaceholder layout slots).
  */
 export function MarketingPhoto({
   src,

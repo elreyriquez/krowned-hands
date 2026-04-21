@@ -7,11 +7,11 @@ export type Testimonial = {
   attribution: string;
 };
 
-/** Large serif quote band — anonymous feedback; rotates on the client */
+/** Large serif quote band (anonymous feedback; rotates on the client) */
 export const FEATURED_ROTATING_ANONYMOUS: Testimonial[] = [
   {
     quote:
-      "I booked an hour. I walked away with a week of sleep. Jordan brought calm into my house — and it stayed after he left.",
+      "I booked an hour. I walked away with a week of sleep. Jordan brought calm into my house, and it stayed after he left.",
     attribution: "Guest feedback",
   },
   {
@@ -20,7 +20,7 @@ export const FEATURED_ROTATING_ANONYMOUS: Testimonial[] = [
   },
   {
     quote:
-      "For the first time in two years, I rode my bike along the coast without shoulder pain. Absolutely incredible—I'm so grateful.",
+      "For the first time in two years, I rode my bike along the coast without shoulder pain. Absolutely incredible. I'm so grateful.",
     attribution: "Guest feedback",
   },
   {
@@ -30,31 +30,31 @@ export const FEATURED_ROTATING_ANONYMOUS: Testimonial[] = [
   },
   {
     quote:
-      "I haven't felt pain relief like this in a while. You listened, took your time, and cleared the knots—one of the best sessions I've ever had.",
+      "I haven't felt pain relief like this in a while. You listened, took your time, and cleared the knots. One of the best sessions I've ever had.",
     attribution: "Guest feedback",
   },
   {
     quote:
-      "I had this feeling of calm that was really wonderful—it should be my weekly ritual.",
+      "I had this feeling of calm that was really wonderful. It should be my weekly ritual.",
     attribution: "Guest feedback",
   },
 ];
 
-/** Three cards — Google reviews */
+/** Three cards (Google reviews) */
 export const GOOGLE_TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      "I discovered Jordan through Visit Jamaica—I'm so glad I followed my intuition. This was not just a massage—it was an experience: calm, focused, deeply reassuring. Every movement felt intentional and therapeutic. Truly exceptional.",
+      "I discovered Jordan through Visit Jamaica. I'm so glad I followed my intuition. This was not just a massage. It was an experience: calm, focused, deeply reassuring. Every movement felt intentional and therapeutic. Truly exceptional.",
     attribution: "Jennifer H. · Google review",
   },
   {
     quote:
-      "It genuinely feels as though you reset my digestive system. I'm impressed that a single session could improve something so much when pills or supplements never made a real difference—I'm making this a regular part of my self-care.",
+      "It genuinely feels as though you reset my digestive system. I'm impressed that a single session could improve something so much when pills or supplements never made a real difference. I'm making this a regular part of my self-care.",
     attribution: "Carla R. · Google review",
   },
   {
     quote:
-      "I received a massage from Jordan at the Vital Frequency retreat—the experience was life changing. All the pain I was carrying melted away; his presence, technique, and ability to attune to what I needed make him top-tier.",
+      "I received a massage from Jordan at the Vital Frequency retreat. The experience was life changing. All the pain I was carrying melted away; his presence, technique, and ability to attune to what I needed make him top-tier.",
     attribution: "Tia-Lynn G. · Google review",
   },
 ];

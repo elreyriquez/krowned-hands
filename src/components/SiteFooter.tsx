@@ -39,7 +39,7 @@ export function SiteFooter() {
       <div className="border-t border-[var(--kh-line)]">
         <div className="mx-auto max-w-6xl px-5 md:px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-[var(--kh-brown-soft)]">
           <p>© {new Date().getFullYear()} Krowned Hands Ltd. All rights reserved.</p>
-          <p className="opacity-80">Private and respectful — your details are used only for booking.</p>
+          <p className="opacity-80">Private and respectful. Your details are used only for booking.</p>
         </div>
       </div>
     </footer>

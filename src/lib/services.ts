@@ -6,7 +6,7 @@
  * common mobile-massage event types at the ~$150 anchor price referenced
  * in the growth action plan, with room for the owner to adjust in one place.
  *
- * To change pricing/durations, edit this file — both the booking form
+ * To change pricing/durations, edit this file. Both the booking form
  * and the admin view read from here.
  */
 
@@ -29,7 +29,7 @@ export const SERVICES: Service[] = [
     priceUsd: 150,
     tagline: "The foundation.",
     description:
-      "A focused 60-minute session tailored to your body on the day — combining therapeutic pressure, breath, and nervous-system awareness.",
+      "A focused 60-minute session tailored to your body on the day, combining therapeutic pressure, breath, and nervous-system awareness.",
   },
   {
     id: "deep-recovery-90",
@@ -56,7 +56,7 @@ export const SERVICES: Service[] = [
     priceUsd: 360,
     tagline: "Side by side.",
     description:
-      "Two concurrent sessions for couples or close friends. Subject to availability — please include a note if a second therapist is required.",
+      "Two concurrent sessions for couples or close friends. Subject to availability. Please include a note if a second therapist is required.",
   },
 ];
 

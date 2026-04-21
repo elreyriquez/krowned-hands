@@ -6,13 +6,13 @@ import { SiteFooter } from "@/components/SiteFooter";
 export const metadata: Metadata = {
   metadataBase: new URL("https://krownedhands.com"),
   title: {
-    default: "Krowned Hands — Mobile Massage Therapy & Holistic Bodywork",
+    default: "Krowned Hands: Mobile Massage Therapy & Holistic Bodywork",
     template: "%s · Krowned Hands",
   },
   description:
     "Transformational body work by Jordan. Pain relief, deep recovery, and nervous system reset. Mobile massage therapy in Kingston and Montego Bay, Jamaica.",
   openGraph: {
-    title: "Krowned Hands — Transformational Body Work",
+    title: "Krowned Hands: Transformational Body Work",
     description:
       "Pain relief · Deep recovery · Nervous system reset. Mobile massage in Kingston and Montego Bay.",
     type: "website",

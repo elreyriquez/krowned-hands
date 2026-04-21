@@ -11,7 +11,7 @@ type Props = {
   children?: ReactNode;
   /** Shown as a small caption (e.g. "Image: hero portrait, 16/9"). */
   hint?: string;
-  /** Rounded corners — default `lg`. */
+  /** Rounded corners (default `lg`). */
   rounded?: "none" | "md" | "lg" | "xl";
 };
 

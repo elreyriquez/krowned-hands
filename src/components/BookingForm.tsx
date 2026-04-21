@@ -27,10 +27,10 @@ type FormState = {
 };
 
 const TIME_WINDOWS = [
-  "Morning · 8:00 AM – 11:00 AM",
-  "Midday · 11:00 AM – 2:00 PM",
-  "Afternoon · 2:00 PM – 5:00 PM",
-  "Evening · 5:00 PM – 8:00 PM",
+  "Morning · 8:00 AM - 11:00 AM",
+  "Midday · 11:00 AM - 2:00 PM",
+  "Afternoon · 2:00 PM - 5:00 PM",
+  "Evening · 5:00 PM - 8:00 PM",
 ];
 
 function todayIso(): string {
@@ -122,7 +122,7 @@ export function BookingForm({ services, areas }: Props) {
       const data = await res.json();
       if (!res.ok) {
         if (data?.errors) setErrors(data.errors);
-        setServerError(data?.message || "Could not submit — please try again.");
+        setServerError(data?.message || "Could not submit. Please try again.");
         setSubmitting(false);
         return;
       }
@@ -130,7 +130,7 @@ export function BookingForm({ services, areas }: Props) {
       setStep(3);
       router.replace("/book?confirmed=1", { scroll: true });
     } catch {
-      setServerError("Network error — please try again.");
+      setServerError("Network error. Please try again.");
       setSubmitting(false);
     }
   }
@@ -340,7 +340,7 @@ function StepWhenWhere({
           value={form.address}
           onChange={(e) => update("address", e.target.value)}
         />
-        <p className="kh-help">Private home, hotel, or villa — we keep this confidential.</p>
+        <p className="kh-help">Private home, hotel, or villa. We keep this confidential.</p>
         {errors.address ? <p className="kh-error">{errors.address}</p> : null}
       </div>
 
@@ -447,7 +447,7 @@ function StepContact({
           value={form.message}
           onChange={(e) => update("message", e.target.value)}
         />
-        <p className="kh-help">Optional — shared only with Jordan for your session.</p>
+        <p className="kh-help">Optional. Shared only with Jordan for your session.</p>
       </div>
     </fieldset>
   );
@@ -471,12 +471,12 @@ function StepReview({
     ["Session", `${service.name} · ${service.durationMinutes} min · $${service.priceUsd}`],
     ["Area", areaLabel],
     ["Address", form.address],
-    ["Arrival notes", form.addressNotes || "—"],
+    ["Arrival notes", form.addressNotes || "-"],
     ["Preferred", `${form.preferredDate} · ${form.preferredWindow}`],
     ["Name", form.name],
     ["Email", form.email],
     ["Phone", form.phone],
-    ["Notes for Jordan", form.message || "—"],
+    ["Notes for Jordan", form.message || "-"],
   ];
 
   return (
@@ -501,7 +501,7 @@ function StepReview({
           className="mt-1 h-5 w-5 accent-[var(--kh-brown)]"
         />
         <span>
-          I understand this is a reservation request — Jordan will confirm by message within 24
+          I understand this is a reservation request. Jordan will confirm by message within 24
           hours. I&rsquo;ve shared accurate contact details and a safe, private space for the
           session. I agree to the{" "}
           <Link href="#faq" className="kh-link">cancellation window</Link> (12 hours).
@@ -521,7 +521,7 @@ function Summary({
   service?: Service;
   areas: { id: string; label: string }[];
 }) {
-  const areaLabel = areas.find((a) => a.id === form.area)?.label || "—";
+  const areaLabel = areas.find((a) => a.id === form.area)?.label || "-";
   return (
     <div className="kh-card sticky top-24">
       <p className="text-[var(--kh-gold-deep)] text-xs tracking-[0.22em] uppercase">
@@ -537,13 +537,13 @@ function Summary({
       ) : null}
       <dl className="mt-6 space-y-3 text-sm">
         <Row k="Area" v={areaLabel} />
-        <Row k="Address" v={form.address || "—"} />
-        <Row k="When" v={form.preferredDate ? `${form.preferredDate} · ${form.preferredWindow || "—"}` : "—"} />
-        <Row k="Name" v={form.name || "—"} />
+        <Row k="Address" v={form.address || "-"} />
+        <Row k="When" v={form.preferredDate ? `${form.preferredDate} · ${form.preferredWindow || "-"}` : "-"} />
+        <Row k="Name" v={form.name || "-"} />
       </dl>
       <hr className="kh-gold-rule my-6 !w-full" style={{ width: "100%" }} />
       <p className="text-xs text-[var(--kh-brown-soft)] leading-relaxed">
-        This is a reservation request. Jordan will confirm availability by message — payment is
+        This is a reservation request. Jordan will confirm availability by message. Payment is
         not collected here.
       </p>
     </div>

@@ -24,7 +24,7 @@ export default function BookPage() {
           </h1>
           <p className="mt-4 text-[var(--kh-brown-soft)] leading-relaxed">
             Share a few details and we&rsquo;ll confirm your window within 24 hours. No payment is
-            collected here — this is a reservation request, not a calendar slot.
+            collected here. This is a reservation request, not a calendar slot.
           </p>
         </div>
         <div className="mt-10">

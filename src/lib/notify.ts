@@ -29,11 +29,11 @@ export async function notifyNewBooking(record: BookingRecord): Promise<void> {
 async function sendResendEmail(record: BookingRecord): Promise<void> {
   const to = process.env.BOOKINGS_EMAIL!;
   const from = process.env.BOOKINGS_FROM_EMAIL || "bookings@krownedhands.com";
-  const subject = `New reservation — ${record.name} · ${record.serviceName}`;
+  const subject = `New reservation: ${record.name} · ${record.serviceName}`;
   const body = [
     `${record.name} requested a ${record.serviceName} (${record.durationMinutes} min).`,
     `Area: ${record.area}`,
-    `Address: ${record.address}${record.addressNotes ? ` — ${record.addressNotes}` : ""}`,
+    `Address: ${record.address}${record.addressNotes ? ` (${record.addressNotes})` : ""}`,
     `Preferred: ${record.preferredDate} · ${record.preferredWindow}`,
     `Email: ${record.email}`,
     `Phone: ${record.phone}`,

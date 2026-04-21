@@ -10,7 +10,7 @@ import crypto from "node:crypto";
  *  - Easy to back up, grep, and migrate into a real DB later.
  *
  * For production behind serverless (Vercel, Netlify), swap `readAll`/`append`
- * to use Vercel Blob, Supabase, Neon, or SQLite via Turso — the shape of
+ * to use Vercel Blob, Supabase, Neon, or SQLite via Turso. The shape of
  * `BookingRecord` stays the same.
  */
 
@@ -28,7 +28,7 @@ export type BookingRecord = {
   address: string;
   addressNotes?: string;
   preferredDate: string; // YYYY-MM-DD
-  preferredWindow: string; // e.g. "9:00 AM – 12:00 PM"
+  preferredWindow: string; // e.g. "9:00 AM - 12:00 PM"
   name: string;
   email: string;
   phone: string;

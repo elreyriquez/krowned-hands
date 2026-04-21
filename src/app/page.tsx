@@ -24,7 +24,7 @@ export default function HomePage() {
                 <span className="block mt-2">for how you actually live.</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg text-[var(--kh-brown-soft)] leading-relaxed">
-                Krowned Hands is the private practice of Jordan — a Jamaica-based therapist
+                Krowned Hands is the private practice of Jordan, a Jamaica-based therapist
                 bringing massage therapy, bodywork, and holistic services to your space. Pain
                 relief. Deep recovery. Nervous system reset.
               </p>
@@ -38,7 +38,7 @@ export default function HomePage() {
               </div>
               <div className="mt-10 flex items-center gap-6 text-sm text-[var(--kh-brown-soft)]">
                 <div>
-                  <p className="font-serif text-2xl text-[var(--kh-brown)]">60–90<span className="text-base">min</span></p>
+                  <p className="font-serif text-2xl text-[var(--kh-brown)]">60-90<span className="text-base">min</span></p>
                   <p className="tracking-[0.18em] uppercase text-xs mt-1">Session length</p>
                 </div>
                 <div className="h-8 w-px bg-[var(--kh-line)]" />
@@ -56,7 +56,7 @@ export default function HomePage() {
             <div className="md:col-span-5">
               <MarketingPhoto
                 src="/brand/krowned-hands-images/jordan-hero-portrait.png"
-                alt="Jordan — therapeutic massage and bodywork, professional portrait"
+                alt="Jordan, therapeutic massage and bodywork, professional portrait"
                 aspectClass="aspect-[3/4]"
                 sizes="(max-width: 768px) 100vw, 42vw"
                 priority
@@ -79,7 +79,7 @@ export default function HomePage() {
             </h2>
             <hr className="kh-gold-rule mx-auto my-6" />
             <p className="text-[var(--kh-brown-soft)] leading-relaxed">
-              Every booking is tailored — but most sessions move through one of these three lenses.
+              Every booking is tailored, but most sessions move through one of these three lenses.
               Tell us where you are today; we&rsquo;ll meet you there.
             </p>
           </div>
@@ -87,7 +87,7 @@ export default function HomePage() {
             <PillarCard
               eyebrow="Pillar One"
               title="Pain Relief"
-              body="Targeted, informed pressure for the places that need it most — neck, shoulders, lower back, hips. Acute tension, post-training, or chronic holding."
+              body="Targeted, informed pressure for the places that need it most: neck, shoulders, lower back, hips. Acute tension, post-training, or chronic holding."
               icon={
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
                   <path d="M12 21s-7-4.35-7-10a5 5 0 019-3 5 5 0 019 3c0 5.65-7 10-7 10H12z" stroke="currentColor" strokeWidth="1.6" />
@@ -107,7 +107,7 @@ export default function HomePage() {
             <PillarCard
               eyebrow="Pillar Three"
               title="Nervous System Reset"
-              body="A calm, down-regulating modality — long strokes, breath, quiet — designed to move you out of fight-or-flight before you leave the table."
+              body="A calm, down-regulating modality: long strokes, breath, and quiet, designed to move you out of fight-or-flight before you leave the table."
               icon={
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
                   <path d="M3 12c3 0 3-4 6-4s3 8 6 8 3-4 6-4" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" />
@@ -118,7 +118,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------- SERVICES / PRICING (dark band — matches testimonials) ---------- */}
+      {/* ---------- SERVICES / PRICING (dark band, matches testimonials) ---------- */}
       <section className="relative">
         <div className="relative overflow-hidden bg-[var(--kh-charcoal)] text-[var(--kh-cream)]">
           <div
@@ -178,7 +178,7 @@ export default function HomePage() {
             </div>
             <p className="mt-6 text-sm text-[var(--kh-cream)]/70">
               Prices are in USD. Travel within Kingston and Montego Bay is included; out-of-parish
-              travel may carry a small fee — we&rsquo;ll confirm before your visit.
+              travel may carry a small fee. We&rsquo;ll confirm before your visit.
             </p>
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function HomePage() {
           <div className="md:col-span-5">
             <MarketingPhoto
               src="/brand/krowned-hands-images/jordan-founder-image.png"
-              alt="Jordan — founder of Krowned Hands, massage therapist"
+              alt="Jordan, founder of Krowned Hands, massage therapist"
               aspectClass="aspect-[4/5]"
               sizes="(max-width: 768px) 100vw, 40vw"
             />
@@ -198,13 +198,13 @@ export default function HomePage() {
           <div className="md:col-span-7">
             <span className="kh-badge">Meet your therapist</span>
             <h2 className="mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
-              Jordan — founder of Krowned Hands.
+              Jordan, founder of Krowned Hands.
             </h2>
             <hr className="kh-gold-rule my-6" />
             <p className="text-[var(--kh-brown-soft)] leading-relaxed text-lg">
               Krowned Hands began as a mobile practice built on a simple premise: the right
               session, in the right place, changes the week ahead. Jordan works with locals,
-              travellers, corporate guests, and athletes across Jamaica — bringing therapeutic
+              travellers, corporate guests, and athletes across Jamaica, bringing therapeutic
               presence, practical technique, and a calm room, wherever you are.
             </p>
             <p className="mt-4 text-[var(--kh-brown-soft)] leading-relaxed">
@@ -230,39 +230,41 @@ export default function HomePage() {
       </section>
 
       {/* ---------- HOW IT WORKS ---------- */}
-      <section className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-28">
-        <div className="text-center max-w-2xl mx-auto">
-          <span className="kh-badge">How it works</span>
-          <h2 className="mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
-            From reservation to rest.
-          </h2>
-          <hr className="kh-gold-rule mx-auto my-6" />
+      <section className="border-y border-[var(--kh-line)] bg-white">
+        <div className="mx-auto max-w-6xl px-5 md:px-8 py-20 md:py-28">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="kh-badge">How it works</span>
+            <h2 className="mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
+              From reservation to rest.
+            </h2>
+            <hr className="kh-gold-rule mx-auto my-6" />
+          </div>
+          <ol className="mt-12 grid list-none gap-6 md:grid-cols-3">
+            {[
+              {
+                step: "01",
+                title: "Reserve your session",
+                body: "Share your preferred date, service area, and the space we'll be working in. We'll confirm by message.",
+              },
+              {
+                step: "02",
+                title: "We come to you",
+                body: "Jordan arrives with the full set-up: table, linens, oils, music. You choose the room. We take care of the rest.",
+              },
+              {
+                step: "03",
+                title: "Rest, then reset",
+                body: "After your session, you stay put. You get a short aftercare note by email within 24 hours.",
+              },
+            ].map((s) => (
+              <li key={s.step} className="kh-card">
+                <p className="font-serif text-4xl text-[var(--kh-gold-deep)]">{s.step}</p>
+                <h3 className="mt-3 font-serif text-xl text-[var(--kh-brown)]">{s.title}</h3>
+                <p className="mt-2 leading-relaxed text-[var(--kh-brown-soft)]">{s.body}</p>
+              </li>
+            ))}
+          </ol>
         </div>
-        <ol className="mt-12 grid gap-6 md:grid-cols-3 list-none">
-          {[
-            {
-              step: "01",
-              title: "Reserve your session",
-              body: "Share your preferred date, service area, and the space we'll be working in. We'll confirm by message.",
-            },
-            {
-              step: "02",
-              title: "We come to you",
-              body: "Jordan arrives with the full set-up — table, linens, oils, music. You choose the room. We take care of the rest.",
-            },
-            {
-              step: "03",
-              title: "Rest, then reset",
-              body: "After your session, you stay put. You get a short aftercare note by email within 24 hours.",
-            },
-          ].map((s) => (
-            <li key={s.step} className="kh-card">
-              <p className="font-serif text-4xl text-[var(--kh-gold-deep)]">{s.step}</p>
-              <h3 className="mt-3 font-serif text-xl text-[var(--kh-brown)]">{s.title}</h3>
-              <p className="mt-2 text-[var(--kh-brown-soft)] leading-relaxed">{s.body}</p>
-            </li>
-          ))}
-        </ol>
       </section>
 
       {/* ---------- DARK TESTIMONIAL ACCENT ---------- */}
@@ -285,7 +287,7 @@ export default function HomePage() {
             <div className="flex md:col-span-5 md:h-full md:min-h-0 md:items-center">
               <MarketingPhoto
                 src="/brand/krowned-hands-images/editorial-image.png"
-                alt="Therapeutic massage — detail of hands, linens, and session atmosphere"
+                alt="Therapeutic massage, detail of hands, linens, and session atmosphere"
                 aspectClass="aspect-square"
                 sizes="(max-width: 768px) 100vw, 38vw"
                 className="!ring-white/10 shadow-none"
@@ -324,7 +326,7 @@ export default function HomePage() {
             {[
               {
                 q: "Where do you travel to?",
-                a: "Kingston and Montego Bay are the standard service areas. Sessions outside those areas are possible by arrangement — include your address when you reserve and we'll confirm.",
+                a: "Kingston and Montego Bay are the standard service areas. Sessions outside those areas are possible by arrangement. Include your address when you reserve and we'll confirm.",
               },
               {
                 q: "What do I need to have at home?",
@@ -340,11 +342,11 @@ export default function HomePage() {
               },
               {
                 q: "Do you offer couples or back-to-back sessions?",
-                a: "Yes — see the Couples Session above, or leave a note when booking for back-to-back sessions for a partner, family member, or guest.",
+                a: "Yes. See the Couples Session above, or leave a note when booking for back-to-back sessions for a partner, family member, or guest.",
               },
               {
                 q: "Is Krowned Hands a collective?",
-                a: "Jordan is the founding therapist. We are expanding into a small, vetted therapist collective — details to come. Current bookings are with Jordan unless otherwise confirmed.",
+                a: "Jordan is the founding therapist. We are expanding into a small, vetted therapist collective. Details to come. Current bookings are with Jordan unless otherwise confirmed.",
               },
             ].map((f) => (
               <div key={f.q} className="py-6">
@@ -356,29 +358,34 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------- CTA BAND ---------- */}
-      <section className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-28 pb-12">
-        <div
-          className="relative overflow-hidden rounded-3xl border border-[var(--kh-line)] p-8 md:p-14"
-          style={{
-            background:
-              "radial-gradient(60% 55% at 0% 0%, color-mix(in srgb, var(--kh-ochre) 40%, transparent), transparent 70%), radial-gradient(55% 50% at 100% 100%, color-mix(in srgb, var(--kh-sand) 70%, transparent), transparent 70%), var(--kh-cream-soft)",
-          }}
-        >
-          <div className="grid md:grid-cols-12 gap-8 items-center">
-            <div className="md:col-span-8">
-              <h2 className="font-serif text-[var(--kh-brown)] text-3xl md:text-5xl leading-tight">
-                Ready when you are.
-              </h2>
-              <p className="mt-3 text-[var(--kh-brown-soft)] max-w-xl">
-                Reserve your first session in under two minutes. We&rsquo;ll follow up personally
-                to confirm your window.
-              </p>
-            </div>
-            <div className="md:col-span-4 md:text-right">
-              <Link href="/book" className="kh-btn kh-btn-primary">
-                Reserve Your Session
-              </Link>
+      {/* ---------- CTA BAND (dark, matches testimonials) ---------- */}
+      <section className="relative">
+        <div className="relative overflow-hidden bg-[var(--kh-charcoal)] text-[var(--kh-cream)]">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.08]"
+            style={{
+              background:
+                "radial-gradient(50% 40% at 20% 30%, #d7a25a 0%, transparent 70%), radial-gradient(50% 40% at 80% 80%, #d7a25a 0%, transparent 70%)",
+              filter: "blur(10px)",
+            }}
+          />
+          <div className="relative mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-24">
+            <div className="grid items-center gap-8 md:grid-cols-12">
+              <div className="md:col-span-8">
+                <h2 className="font-serif text-3xl leading-tight text-[var(--kh-cream)] md:text-5xl">
+                  Ready when you are.
+                </h2>
+                <p className="mt-3 max-w-xl leading-relaxed text-[var(--kh-cream)]/85">
+                  Reserve your first session in under two minutes. We&rsquo;ll follow up personally
+                  to confirm your window.
+                </p>
+              </div>
+              <div className="md:col-span-4 md:text-right">
+                <Link href="/book" className="kh-btn kh-btn-gold">
+                  Reserve Your Session
+                </Link>
+              </div>
             </div>
           </div>
         </div>

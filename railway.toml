@@ -1,4 +1,4 @@
-# Railway deploy config — https://docs.railway.com/deploy/config-as-code
+# Railway deploy config: https://docs.railway.com/deploy/config-as-code
 # After deploy: set ADMIN_PASSWORD (+ optional vars from `.env.example`) in Railway → Variables.
 
 [build]

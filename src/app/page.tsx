@@ -118,42 +118,70 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------- SERVICES / PRICING ---------- */}
-      <section className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-28">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <div>
-            <span className="kh-badge">Sessions & investment</span>
-            <h2 className="mt-4 font-serif text-[var(--kh-brown)] text-3xl md:text-4xl max-w-xl">
-              Choose the session that meets you today.
-            </h2>
+      {/* ---------- SERVICES / PRICING (dark band — matches testimonials) ---------- */}
+      <section className="relative">
+        <div className="relative overflow-hidden bg-[var(--kh-charcoal)] text-[var(--kh-cream)]">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.08]"
+            style={{
+              background:
+                "radial-gradient(50% 40% at 20% 30%, #d7a25a 0%, transparent 70%), radial-gradient(50% 40% at 80% 80%, #d7a25a 0%, transparent 70%)",
+              filter: "blur(10px)",
+            }}
+          />
+          <div className="relative mx-auto max-w-6xl px-5 md:px-8 py-20 md:py-28">
+            <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <div>
+                <span
+                  className="kh-badge w-fit shrink-0"
+                  style={{
+                    background: "transparent",
+                    color: "var(--kh-gold)",
+                    borderColor: "color-mix(in srgb, var(--kh-gold) 45%, transparent)",
+                  }}
+                >
+                  Sessions & investment
+                </span>
+                <h2 className="mt-4 max-w-xl font-serif text-3xl text-[var(--kh-cream)] md:text-4xl">
+                  Choose the session that meets you today.
+                </h2>
+              </div>
+              <Link href="/book" className="kh-btn kh-btn-gold self-start md:self-auto">
+                Start a booking
+              </Link>
+            </div>
+            <div className="mt-10 grid gap-5 md:grid-cols-2">
+              {services.map((s) => (
+                <article
+                  key={s.id}
+                  className="flex flex-col rounded-xl border border-white/10 bg-white/[0.03] p-6"
+                >
+                  <div className="flex items-baseline justify-between gap-6">
+                    <h3 className="font-serif text-2xl text-[var(--kh-cream)]">{s.name}</h3>
+                    <p className="font-serif text-xl text-[var(--kh-gold)]">${s.priceUsd}</p>
+                  </div>
+                  <p className="mt-1 text-sm uppercase tracking-[0.16em] text-[var(--kh-gold)]">
+                    {s.durationMinutes} minutes · {s.tagline}
+                  </p>
+                  <p className="mt-4 leading-relaxed text-[var(--kh-cream)]/85">{s.description}</p>
+                  <div className="mt-auto pt-6">
+                    <Link
+                      href={`/book?service=${s.id}`}
+                      className="text-sm text-[var(--kh-gold)] underline decoration-white/25 underline-offset-4 transition-colors hover:text-[var(--kh-cream)]"
+                    >
+                      Reserve this session →
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <p className="mt-6 text-sm text-[var(--kh-cream)]/70">
+              Prices are in USD. Travel within Kingston and Montego Bay is included; out-of-parish
+              travel may carry a small fee — we&rsquo;ll confirm before your visit.
+            </p>
           </div>
-          <Link href="/book" className="kh-btn kh-btn-gold self-start md:self-auto">
-            Start a booking
-          </Link>
         </div>
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
-          {services.map((s) => (
-            <article key={s.id} className="kh-card flex flex-col">
-              <div className="flex items-baseline justify-between gap-6">
-                <h3 className="font-serif text-2xl text-[var(--kh-brown)]">{s.name}</h3>
-                <p className="font-serif text-xl text-[var(--kh-gold-deep)]">${s.priceUsd}</p>
-              </div>
-              <p className="mt-1 text-sm tracking-[0.16em] uppercase text-[var(--kh-gold-deep)]">
-                {s.durationMinutes} minutes · {s.tagline}
-              </p>
-              <p className="mt-4 text-[var(--kh-brown-soft)] leading-relaxed">{s.description}</p>
-              <div className="mt-auto pt-6">
-                <Link href={`/book?service=${s.id}`} className="kh-link text-sm">
-                  Reserve this session →
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-        <p className="mt-6 text-sm text-[var(--kh-brown-soft)]">
-          Prices are in USD. Travel within Kingston and Montego Bay is included; out-of-parish
-          travel may carry a small fee — we&rsquo;ll confirm before your visit.
-        </p>
       </section>
 
       {/* ---------- ABOUT JORDAN ---------- */}
@@ -283,47 +311,49 @@ export default function HomePage() {
       </section>
 
       {/* ---------- FAQ ---------- */}
-      <section id="faq" className="mx-auto max-w-4xl px-5 md:px-8 pt-20 md:pt-28">
-        <div className="text-center">
-          <span className="kh-badge">Questions</span>
-          <h2 className="mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
-            Good to know.
-          </h2>
-          <hr className="kh-gold-rule mx-auto my-6" />
+      <section id="faq" className="border-y border-[var(--kh-line)] bg-white">
+        <div className="mx-auto max-w-4xl px-5 md:px-8 py-20 md:py-28">
+          <div className="text-center">
+            <span className="kh-badge">Questions</span>
+            <h2 className="mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
+              Good to know.
+            </h2>
+            <hr className="kh-gold-rule mx-auto my-6" />
+          </div>
+          <dl className="mt-10 divide-y divide-[var(--kh-line)] border-y border-[var(--kh-line)]">
+            {[
+              {
+                q: "Where do you travel to?",
+                a: "Kingston and Montego Bay are the standard service areas. Sessions outside those areas are possible by arrangement — include your address when you reserve and we'll confirm.",
+              },
+              {
+                q: "What do I need to have at home?",
+                a: "Just a private room with enough space for the table (about 7x3 feet) and an outlet nearby. We bring the table, linens, oils, and music.",
+              },
+              {
+                q: "How do I prepare for my session?",
+                a: "Hydrate during the day, avoid heavy meals within 60 minutes of your start time, and wear whatever lets you relax. Everything else is our job.",
+              },
+              {
+                q: "What's your cancellation policy?",
+                a: "Life happens. Please give at least 12 hours' notice for cancellations or reschedules so we can offer your slot to someone else.",
+              },
+              {
+                q: "Do you offer couples or back-to-back sessions?",
+                a: "Yes — see the Couples Session above, or leave a note when booking for back-to-back sessions for a partner, family member, or guest.",
+              },
+              {
+                q: "Is Krowned Hands a collective?",
+                a: "Jordan is the founding therapist. We are expanding into a small, vetted therapist collective — details to come. Current bookings are with Jordan unless otherwise confirmed.",
+              },
+            ].map((f) => (
+              <div key={f.q} className="py-6">
+                <dt className="font-serif text-xl text-[var(--kh-brown)]">{f.q}</dt>
+                <dd className="mt-2 text-[var(--kh-brown-soft)] leading-relaxed">{f.a}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
-        <dl className="mt-10 divide-y divide-[var(--kh-line)] border-y border-[var(--kh-line)]">
-          {[
-            {
-              q: "Where do you travel to?",
-              a: "Kingston and Montego Bay are the standard service areas. Sessions outside those areas are possible by arrangement — include your address when you reserve and we'll confirm.",
-            },
-            {
-              q: "What do I need to have at home?",
-              a: "Just a private room with enough space for the table (about 7x3 feet) and an outlet nearby. We bring the table, linens, oils, and music.",
-            },
-            {
-              q: "How do I prepare for my session?",
-              a: "Hydrate during the day, avoid heavy meals within 60 minutes of your start time, and wear whatever lets you relax. Everything else is our job.",
-            },
-            {
-              q: "What's your cancellation policy?",
-              a: "Life happens. Please give at least 12 hours' notice for cancellations or reschedules so we can offer your slot to someone else.",
-            },
-            {
-              q: "Do you offer couples or back-to-back sessions?",
-              a: "Yes — see the Couples Session above, or leave a note when booking for back-to-back sessions for a partner, family member, or guest.",
-            },
-            {
-              q: "Is Krowned Hands a collective?",
-              a: "Jordan is the founding therapist. We are expanding into a small, vetted therapist collective — details to come. Current bookings are with Jordan unless otherwise confirmed.",
-            },
-          ].map((f) => (
-            <div key={f.q} className="py-6">
-              <dt className="font-serif text-xl text-[var(--kh-brown)]">{f.q}</dt>
-              <dd className="mt-2 text-[var(--kh-brown-soft)] leading-relaxed">{f.a}</dd>
-            </div>
-          ))}
-        </dl>
       </section>
 
       {/* ---------- CTA BAND ---------- */}

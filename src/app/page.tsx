@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ImagePlaceholder } from "@/components/ImagePlaceholder";
+import { MarketingPhoto } from "@/components/MarketingPhoto";
 import { PillarCard } from "@/components/PillarCard";
 import { FeaturedQuoteRotator } from "@/components/FeaturedQuoteRotator";
 import { FEATURED_ROTATING_ANONYMOUS, GOOGLE_TESTIMONIALS } from "@/lib/testimonials";
@@ -54,12 +54,12 @@ export default function HomePage() {
               </div>
             </div>
             <div className="md:col-span-5">
-              <ImagePlaceholder
-                label="Hero portrait — Jordan at work, warm light, hands on client's shoulders"
-                hint="3:4 · portrait"
-                ratio="3/4"
-                rounded="xl"
-                tone="gold"
+              <MarketingPhoto
+                src="/brand/krowned-hands-images/jordan-hero-portrait.png"
+                alt="Jordan — therapeutic massage and bodywork, professional portrait"
+                aspectClass="aspect-[3/4]"
+                sizes="(max-width: 768px) 100vw, 42vw"
+                priority
               />
             </div>
           </div>
@@ -155,11 +155,11 @@ export default function HomePage() {
       <section id="about" className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-28">
         <div className="grid md:grid-cols-12 gap-10 items-center">
           <div className="md:col-span-5">
-            <ImagePlaceholder
-              label="Jordan portrait — soft natural light, calm expression"
-              hint="4:5 · portrait"
-              ratio="4/5"
-              rounded="xl"
+            <MarketingPhoto
+              src="/brand/krowned-hands-images/jordan-founder-image.png"
+              alt="Jordan — founder of Krowned Hands, massage therapist"
+              aspectClass="aspect-[4/5]"
+              sizes="(max-width: 768px) 100vw, 40vw"
             />
           </div>
           <div className="md:col-span-7">
@@ -250,12 +250,12 @@ export default function HomePage() {
               <FeaturedQuoteRotator quotes={FEATURED_ROTATING_ANONYMOUS} intervalSec={8} />
             </div>
             <div className="flex md:col-span-5 md:h-full md:min-h-0 md:items-center">
-              <ImagePlaceholder
-                label="Editorial detail — hands, oil, linen (dark mood shot)"
-                hint="1:1 · square · dark"
-                ratio="1/1"
-                rounded="xl"
-                tone="dark"
+              <MarketingPhoto
+                src="/brand/krowned-hands-images/editorial-image.png"
+                alt="Therapeutic massage — detail of hands, linens, and session atmosphere"
+                aspectClass="aspect-square"
+                sizes="(max-width: 768px) 100vw, 38vw"
+                className="!ring-white/10 shadow-none"
               />
             </div>
             <div className="grid w-full max-w-full shrink-0 grid-cols-1 gap-[1.15rem] md:col-span-12 md:grid-cols-3 md:gap-[1.15rem] lg:gap-5">

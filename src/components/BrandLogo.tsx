@@ -38,8 +38,8 @@ export function BrandLogo({ variant = "header", className = "" }: Props) {
       <Image
         src="/brand/logo-type.png"
         alt="Krowned Hands"
-        width={1738}
-        height={348}
+        width={1690}
+        height={391}
         priority={!footer}
         sizes={footer ? "min(360px, 92vw)" : "min(280px, 62vw)"}
         className={

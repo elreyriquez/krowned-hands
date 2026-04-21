@@ -1,26 +1,222 @@
 @import "tailwindcss";
 
+/* ---------- Krowned Hands brand tokens ---------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-playfair: "Playfair Display", ui-serif, Georgia, serif;
+  --font-inter: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-great-vibes: "Great Vibes", "Allura", cursive;
+  /* Core palette */
+  --kh-cream: #f7efe2;         /* primary background */
+  --kh-cream-soft: #fbf5ea;    /* elevated / card */
+  --kh-sand: #ecdcc1;          /* watercolor mid */
+  --kh-ochre: #c89a5b;         /* tan brush accent */
+  --kh-gold: #b88a4a;          /* champagne gold */
+  --kh-gold-deep: #8f6a33;     /* darker gold for text-on-cream AA */
+  --kh-brown: #3b2419;         /* chocolate headlines */
+  --kh-brown-soft: #5a3a2a;    /* body on cream */
+  --kh-charcoal: #141210;      /* optional dark section */
+  --kh-ink: #24201d;           /* body on cream for accessibility */
+  --kh-line: #e5d6bf;          /* hairline dividers */
+  --kh-focus: #b88a4a;
+
+  --background: var(--kh-cream);
+  --foreground: var(--kh-ink);
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-cream: var(--kh-cream);
+  --color-cream-soft: var(--kh-cream-soft);
+  --color-sand: var(--kh-sand);
+  --color-ochre: var(--kh-ochre);
+  --color-gold: var(--kh-gold);
+  --color-gold-deep: var(--kh-gold-deep);
+  --color-brown: var(--kh-brown);
+  --color-brown-soft: var(--kh-brown-soft);
+  --color-charcoal: var(--kh-charcoal);
+  --color-ink: var(--kh-ink);
+  --color-line: var(--kh-line);
+
+  --font-serif: var(--font-playfair), "Playfair Display", ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-script: var(--font-great-vibes), "Great Vibes", "Allura", cursive;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  background: var(--background);
+  color: var(--foreground);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--kh-ochre) 40%, transparent);
+  color: var(--kh-brown);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--kh-focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Serif headings default */
+.font-serif { font-family: var(--font-serif); letter-spacing: -0.01em; }
+.font-script { font-family: var(--font-script); }
+.font-sans { font-family: var(--font-sans); }
+
+/* Watercolor backdrop — subtle, performant, pure CSS */
+.kh-watercolor {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--kh-cream);
+}
+.kh-watercolor::before,
+.kh-watercolor::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+.kh-watercolor::before {
+  background:
+    radial-gradient(60% 45% at 0% 0%, color-mix(in srgb, var(--kh-ochre) 35%, transparent) 0%, transparent 70%),
+    radial-gradient(55% 40% at 100% 0%, color-mix(in srgb, var(--kh-sand) 70%, transparent) 0%, transparent 70%),
+    radial-gradient(70% 50% at 100% 100%, color-mix(in srgb, var(--kh-ochre) 22%, transparent) 0%, transparent 70%),
+    radial-gradient(60% 45% at 0% 100%, color-mix(in srgb, var(--kh-sand) 55%, transparent) 0%, transparent 70%);
+  filter: blur(8px) saturate(1.05);
+  opacity: 0.9;
+}
+.kh-watercolor::after {
+  /* fine grain for paper feel */
+  background-image:
+    radial-gradient(rgba(59,36,25,0.035) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+}
+
+.kh-gold-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--kh-gold) 50%, transparent);
+  border: 0;
+  width: 120px;
+}
+
+.kh-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--kh-line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--kh-cream-soft) 85%, transparent);
+  color: var(--kh-brown);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.kh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.6rem;
+  border-radius: 999px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: transform .15s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
+  min-height: 48px;
+}
+.kh-btn-primary {
+  background: var(--kh-brown);
+  color: var(--kh-cream);
+  box-shadow: 0 1px 0 rgba(255,255,255,.15) inset, 0 6px 18px -10px rgba(59,36,25,.6);
+}
+.kh-btn-primary:hover { background: color-mix(in srgb, var(--kh-brown) 85%, var(--kh-gold)); }
+.kh-btn-primary:active { transform: translateY(1px); }
+
+.kh-btn-ghost {
+  background: transparent;
+  color: var(--kh-brown);
+  border: 1px solid var(--kh-brown);
+}
+.kh-btn-ghost:hover { background: var(--kh-brown); color: var(--kh-cream); }
+
+.kh-btn-gold {
+  background: linear-gradient(180deg, var(--kh-ochre), var(--kh-gold));
+  color: var(--kh-brown);
+  font-weight: 600;
+}
+.kh-btn-gold:hover { filter: brightness(1.03); }
+
+.kh-input,
+.kh-select,
+.kh-textarea {
+  width: 100%;
+  background: var(--kh-cream-soft);
+  border: 1px solid var(--kh-line);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  color: var(--kh-ink);
+  font: inherit;
+  min-height: 48px;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.kh-input:focus,
+.kh-select:focus,
+.kh-textarea:focus {
+  outline: none;
+  border-color: var(--kh-gold);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--kh-gold) 22%, transparent);
+  background: #fff;
+}
+.kh-textarea { min-height: 120px; resize: vertical; }
+.kh-label {
+  display: block;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kh-brown-soft);
+  margin-bottom: 0.4rem;
+}
+.kh-help {
+  font-size: 0.82rem;
+  color: var(--kh-brown-soft);
+  margin-top: 0.35rem;
+}
+.kh-error {
+  font-size: 0.82rem;
+  color: #8a2f1f;
+  margin-top: 0.35rem;
+}
+
+.kh-card {
+  background: var(--kh-cream-soft);
+  border: 1px solid var(--kh-line);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+}
+
+.kh-link {
+  color: var(--kh-gold-deep);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+.kh-link:hover { color: var(--kh-brown); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
 }

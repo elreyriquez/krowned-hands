@@ -1,4 +1,6 @@
 import type { BookingRecord } from "./bookings";
+import { SITE_CONTACT_EMAIL } from "./external-links";
+import { formatServiceAreaLabel } from "./services";
 import { formatJmd, formatUsd } from "./pricing";
 
 /**
@@ -29,7 +31,7 @@ export async function notifyNewBooking(record: BookingRecord): Promise<void> {
 
 async function sendResendEmail(record: BookingRecord): Promise<void> {
   const to = process.env.BOOKINGS_EMAIL!;
-  const from = process.env.BOOKINGS_FROM_EMAIL || "bookings@krownedhands.com";
+  const from = process.env.BOOKINGS_FROM_EMAIL || SITE_CONTACT_EMAIL;
   const subject = `New reservation: ${record.name} · ${record.serviceName}`;
   const when =
     record.preferredWindow ||
@@ -42,7 +44,7 @@ async function sendResendEmail(record: BookingRecord): Promise<void> {
       : `${formatUsd(record.priceUsd)}`;
   const body = [
     `${record.name} requested a ${record.serviceName} (${record.durationMinutes} min). ${priceLine}.`,
-    `Area: ${record.area}`,
+    `Area: ${formatServiceAreaLabel(record.area, record.areaCustom)}`,
     `Address: ${record.address}${record.addressNotes ? ` (${record.addressNotes})` : ""}`,
     `Preferred: ${record.preferredDate} · ${when}`,
     `Email: ${record.email}`,

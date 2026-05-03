@@ -7,7 +7,10 @@ export type Testimonial = {
   attribution: string;
 };
 
-/** Large serif quote band (anonymous feedback; rotates on the client) */
+/**
+ * Large serif quote band. Replace `attribution` with initials · location once
+ * reviewer names are confirmed (no screenshots in-repo to source these from).
+ */
 export const FEATURED_ROTATING_ANONYMOUS: Testimonial[] = [
   {
     quote:

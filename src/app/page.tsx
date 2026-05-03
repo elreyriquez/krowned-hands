@@ -6,6 +6,7 @@ import { FeaturedQuoteRotator } from "@/components/FeaturedQuoteRotator";
 import { QuoteCurrencyToggle } from "@/components/QuoteCurrencyToggle";
 import { Reveal } from "@/components/Reveal";
 import { SessionsPricingCards } from "@/components/SessionsPricingCards";
+import { GOOGLE_REVIEWS_URL, WHATSAPP_CHAT_URL } from "@/lib/external-links";
 import { FEATURED_ROTATING_ANONYMOUS, GOOGLE_TESTIMONIALS } from "@/lib/testimonials";
 import { publicServices } from "@/lib/services";
 
@@ -16,7 +17,7 @@ export default function HomePage() {
   return (
     <>
       {/* ---------- HERO ---------- */}
-      <section className="kh-watercolor">
+      <section className="kh-hero-ground">
         <div className="mx-auto max-w-6xl px-5 md:px-8 pt-14 md:pt-24 pb-20 md:pb-28">
           <div className="grid md:grid-cols-12 gap-10 md:gap-12 items-center">
             <Reveal animation="from-left" className="md:col-span-7">
@@ -27,12 +28,11 @@ export default function HomePage() {
                 <span className="font-script text-[var(--kh-gold-deep)] text-5xl sm:text-6xl md:text-7xl leading-none block mt-2">
                   <span className="kh-stretch">body work</span>
                 </span>
-                <span className="block mt-2">for how you actually live.</span>
+                <span className="block mt-2">wherever life has you.</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg text-[var(--kh-brown-soft)] leading-relaxed">
-                Krowned Hands is the private practice of Jordan, a Jamaica-based therapist
-                bringing massage therapy, bodywork, and holistic services to your space. Pain
-                relief. Deep recovery. Nervous system reset.
+                Krowned Hands is Jordan&rsquo;s private mobile practice, bringing premium
+                therapeutic massage to your spaces (home, hotel, villa, or retreat) across Jamaica.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link href="/book" className="kh-btn kh-btn-primary">
@@ -93,7 +93,7 @@ export default function HomePage() {
             </h2>
             <hr className="kh-gold-rule mx-auto my-6" />
             <p className="text-[var(--kh-brown-soft)] leading-relaxed">
-              Every booking is tailored, but most sessions move through one of these three lenses.
+              Every reservation is tailored, but most sessions move through one of these three lenses.
               Tell us where you are today; we&rsquo;ll meet you there.
             </p>
           </Reveal>
@@ -135,6 +135,72 @@ export default function HomePage() {
               />
             </Reveal>
           </div>
+          <Reveal animation="fade" delayMs={200} className="mt-10 max-w-3xl mx-auto text-center">
+            <p className="text-[var(--kh-brown-soft)] leading-relaxed text-[15px] md:text-base border-t border-[var(--kh-line)] pt-8">
+              Jordan also integrates functional movement assessment for clients dealing with chronic
+              postural patterns. To ask how this can be part of your care,{" "}
+              <a
+                className="kh-link"
+                href={WHATSAPP_CHAT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                inquire on WhatsApp
+              </a>
+              .
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ---------- ABOUT JORDAN ---------- */}
+      <section
+        id="about"
+        className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-28 pb-16 md:pb-28"
+      >
+        <div className="grid md:grid-cols-12 gap-10 items-center">
+          <Reveal animation="from-left" className="md:col-span-5">
+            <MarketingPhoto
+              src="/brand/krowned-hands-images/jordan-founder-image.png"
+              alt="Jordan, founder of Krowned Hands, massage therapist"
+              aspectClass="aspect-[4/5]"
+              sizes="(max-width: 768px) 100vw, 40vw"
+            />
+          </Reveal>
+          <Reveal animation="from-right" delayMs={120} className="md:col-span-7">
+            <span className="kh-badge">Meet your therapist</span>
+            <h2 className="mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
+              Jordan King
+            </h2>
+            <hr className="kh-gold-rule my-6" />
+            <p className="text-[var(--kh-brown-soft)] leading-relaxed text-lg">
+              Jordan started Krowned Hands for one reason: he finally got out of pain and needed
+              other people to feel that too.
+            </p>
+            <p className="mt-4 text-[var(--kh-brown-soft)] leading-relaxed">
+              A single session changed his baseline after years of back pain. What followed was a
+              deep dive into the body. Specifically, how freeing the muscular system frees
+              everything else.
+            </p>
+            <p className="mt-4 text-[var(--kh-brown-soft)] leading-relaxed">
+              He&rsquo;s certified in Swedish, deep tissue, lymphatic drainage, passive stretch
+              therapy, Reiki, and postnatal massage, with a self-built practice in
+              myofascial release, trigger point therapy, breathwork, and somatic release. His
+              understanding of nervous system regulation runs deeper than any single course: built
+              through lived experience, personal practice, ongoing study, and years of mentorship
+              from practitioners with over two decades in the field.
+            </p>
+            <p className="mt-4 text-[var(--kh-brown-soft)] leading-relaxed">
+              Clients say the same things: his presence, his stillness, the sense of safety. Slow,
+              deliberate work. Strength and gentleness in the same hands. He&rsquo;s worked with
+              athletes, celebrities, executives, retreat guests, and everyday people across
+              Jamaica who decided their body deserved better.
+            </p>
+            <p className="mt-4 text-[var(--kh-brown-soft)] leading-relaxed">
+              He believes the body is our universe. Movement is life. Freedom in the body opens
+              everything else.
+            </p>
+          </Reveal>
         </div>
       </section>
 
@@ -153,51 +219,6 @@ export default function HomePage() {
           <div className="relative mx-auto max-w-6xl px-5 md:px-8 py-20 md:py-28">
             <SessionsPricingCards services={services} />
           </div>
-        </div>
-      </section>
-
-      {/* ---------- ABOUT JORDAN ---------- */}
-      <section id="about" className="mx-auto max-w-6xl px-5 md:px-8 pt-20 md:pt-28">
-        <div className="grid md:grid-cols-12 gap-10 items-center">
-          <Reveal animation="from-left" className="md:col-span-5">
-            <MarketingPhoto
-              src="/brand/krowned-hands-images/jordan-founder-image.png"
-              alt="Jordan, founder of Krowned Hands, massage therapist"
-              aspectClass="aspect-[4/5]"
-              sizes="(max-width: 768px) 100vw, 40vw"
-            />
-          </Reveal>
-          <Reveal animation="from-right" delayMs={120} className="md:col-span-7">
-            <span className="kh-badge">Meet your therapist</span>
-            <h2 className="mt-5 font-serif text-[var(--kh-brown)] text-3xl md:text-5xl">
-              Jordan, founder of Krowned Hands.
-            </h2>
-            <hr className="kh-gold-rule my-6" />
-            <p className="text-[var(--kh-brown-soft)] leading-relaxed text-lg">
-              Krowned Hands began as a mobile practice built on a simple premise: the right
-              session, in the right place, changes the week ahead. Jordan works with locals,
-              travellers, corporate guests, and athletes across Jamaica, bringing therapeutic
-              presence, practical technique, and a calm room, wherever you are.
-            </p>
-            <p className="mt-4 text-[var(--kh-brown-soft)] leading-relaxed">
-              Every visit includes an in-person intake, a tailored session, and aftercare notes
-              you can actually use. No rushed turnarounds. No upsells at the table.
-            </p>
-            <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-              <div className="kh-card !p-4">
-                <p className="font-serif text-2xl text-[var(--kh-brown)]">Mobile</p>
-                <p className="text-[var(--kh-brown-soft)]">We come to you.</p>
-              </div>
-              <div className="kh-card !p-4">
-                <p className="font-serif text-2xl text-[var(--kh-brown)]">Private</p>
-                <p className="text-[var(--kh-brown-soft)]">One client at a time.</p>
-              </div>
-              <div className="kh-card !p-4 col-span-2 sm:col-span-1">
-                <p className="font-serif text-2xl text-[var(--kh-brown)]">Practiced</p>
-                <p className="text-[var(--kh-brown-soft)]">Locals · Tourists · Athletes.</p>
-              </div>
-            </div>
-          </Reveal>
         </div>
       </section>
 
@@ -291,6 +312,16 @@ export default function HomePage() {
                 </Reveal>
               ))}
             </div>
+            <div className="md:col-span-12 flex justify-center pt-2 md:pt-4">
+              <a
+                href={GOOGLE_REVIEWS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-[var(--kh-gold)] underline decoration-white/25 underline-offset-[5px] transition hover:text-[var(--kh-cream)] hover:decoration-[var(--kh-gold)]"
+              >
+                Read more reviews on Google
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -309,7 +340,7 @@ export default function HomePage() {
             {[
               {
                 q: "Where do you travel to?",
-                a: "Kingston and Montego Bay are the standard service areas. Sessions outside those areas are possible by arrangement. Include your address when you reserve and we'll confirm.",
+                a: "Krowned Hands serves Kingston and Montego Bay as home bases, with sessions available across Jamaica, including hotels, villas, and resort properties in Negril, Ocho Rios, and Port Antonio by arrangement. Out-of-parish travel may carry a small fee; include your location when you reserve and we'll confirm.",
               },
               {
                 q: "What do I need to have at home?",
@@ -321,15 +352,15 @@ export default function HomePage() {
               },
               {
                 q: "What's your cancellation policy?",
-                a: "Life happens. Please give at least 12 hours' notice for cancellations or reschedules so we can offer your slot to someone else.",
+                a: "We require 24 hours' notice for cancellations or reschedules. Your deposit is held and transferable to a future booking within 10 days.",
               },
               {
                 q: "Do you offer couples or back-to-back sessions?",
-                a: "Yes, by arrangement. Book the session you want for yourself and leave a note about a partner, family member, or guest. Jordan will confirm a back-to-back or concurrent option based on availability.",
+                a: "Yes, by arrangement. Reserve the session you want for yourself and leave a note about a partner, family member, or guest. Jordan will confirm a back-to-back or concurrent option based on availability.",
               },
               {
                 q: "Is Krowned Hands a collective?",
-                a: "Jordan is the founding therapist. We are expanding into a small, vetted therapist collective. Details to come. Current bookings are with Jordan unless otherwise confirmed.",
+                a: "Jordan is the founding therapist. We are expanding into a small, vetted therapist collective. Details to come. Current reservations are with Jordan unless otherwise confirmed.",
               },
             ].map((f) => (
               <div key={f.q} className="py-6">

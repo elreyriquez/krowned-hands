@@ -8,6 +8,8 @@ import {
 export type BookingInput = {
   serviceId?: string;
   area?: string;
+  /** Required when area is "other": parish, town, or region. */
+  areaCustom?: string;
   address?: string;
   addressNotes?: string;
   preferredDate?: string;
@@ -33,6 +35,7 @@ export type ValidatedBooking = {
   /** Primary quote surface at submit time. */
   quoteCurrency: "usd" | "jmd";
   area: string;
+  areaCustom?: string;
   address: string;
   addressNotes?: string;
   preferredDate: string;
@@ -66,7 +69,14 @@ export function validateBooking(input: BookingInput): ValidationResult {
 
   const area = s(input.area);
   if (!SERVICE_AREAS.some((a) => a.id === area)) {
-    errors.area = "Choose Kingston or Montego Bay.";
+    errors.area = "Choose a service area.";
+  }
+
+  const areaCustom = s(input.areaCustom);
+  if (area === "other") {
+    if (areaCustom.length < 2) {
+      errors.areaCustom = "Please enter your parish, town, or region.";
+    }
   }
 
   const address = s(input.address);
@@ -100,7 +110,7 @@ export function validateBooking(input: BookingInput): ValidationResult {
 
   const consent =
     input.consent === true || input.consent === "on" || input.consent === "true";
-  if (!consent) errors.consent = "Please acknowledge the booking terms.";
+  if (!consent) errors.consent = "Please acknowledge the reservation terms.";
 
   const qcRaw = s(input.quoteCurrency).toLowerCase();
   const quoteCurrency: "usd" | "jmd" = qcRaw === "jmd" ? "jmd" : "usd";
@@ -122,6 +132,7 @@ export function validateBooking(input: BookingInput): ValidationResult {
       priceJmd: service.priceJmd,
       quoteCurrency,
       area,
+      areaCustom: area === "other" ? areaCustom : undefined,
       address,
       addressNotes: s(input.addressNotes) || undefined,
       preferredDate,

@@ -3,19 +3,29 @@ import "./globals.css";
 import { CurrencyProvider } from "@/components/CurrencyProvider";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://krownedhands.com"),
   title: {
-    default: "Krowned Hands: Mobile Massage Therapy & Holistic Bodywork",
+    default: "Krowned Hands | Mobile Massage Kingston & Montego Bay, Jamaica",
     template: "%s · Krowned Hands",
   },
   description:
-    "Transformational body work by Jordan. Pain relief, deep recovery, and nervous system reset. Mobile massage therapy in Kingston and Montego Bay, Jamaica.",
+    "Transformational body work by Jordan King. Premium mobile massage and therapeutic bodywork in Kingston, Montego Bay, and across Jamaica: homes, hotels, villas, and resorts. Reserve an in-home or on-property session.",
+  keywords: [
+    "mobile massage Kingston",
+    "massage therapist Montego Bay",
+    "in-home massage Jamaica",
+    "hotel massage Kingston Jamaica",
+    "therapeutic massage Montego Bay",
+    "mobile massage therapist Jamaica",
+    "Krowned Hands",
+  ],
   openGraph: {
-    title: "Krowned Hands: Transformational Body Work",
+    title: "Krowned Hands | Mobile Massage Kingston, Montego Bay & Jamaica",
     description:
-      "Pain relief · Deep recovery · Nervous system reset. Mobile massage in Kingston and Montego Bay.",
+      "Therapeutic mobile massage in Kingston, Montego Bay, and across Jamaica. Home, hotel, villa, and resort sessions by reservation.",
     type: "website",
   },
 };
@@ -42,6 +52,7 @@ export default function RootLayout({
           <SiteHeader />
           <main className="flex-1">{children}</main>
           <SiteFooter />
+          <WhatsAppFloat />
         </CurrencyProvider>
       </body>
     </html>

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { QuoteCurrencyToggle } from "@/components/QuoteCurrencyToggle";
 import { useQuoteCurrency } from "@/components/CurrencyProvider";
 import type { Service } from "@/lib/services";
+import { formatServiceAreaLabel } from "@/lib/services";
 import {
   formatDisplayTime,
   parseHHMM,
@@ -23,6 +24,8 @@ type Step = 0 | 1 | 2 | 3 | 4;
 type FormState = {
   serviceId: string;
   area: string;
+  /** Parish / town when area is "other". */
+  areaCustom: string;
   address: string;
   addressNotes: string;
   preferredDate: string;
@@ -68,6 +71,7 @@ export function BookingForm({ services, areas }: Props) {
   const [form, setForm] = useState<FormState>({
     serviceId: initialService,
     area: areas[0]?.id ?? "",
+    areaCustom: "",
     address: "",
     addressNotes: "",
     preferredDate: "",
@@ -86,7 +90,11 @@ export function BookingForm({ services, areas }: Props) {
   const selectedService = services.find((s) => s.id === form.serviceId);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setForm((f) => ({ ...f, [key]: value }));
+    setForm((f) => {
+      const next = { ...f, [key]: value };
+      if (key === "area" && value !== "other") next.areaCustom = "";
+      return next;
+    });
     setErrors((e) => {
       if (!(key in e)) return e;
       const next = { ...e };
@@ -106,6 +114,9 @@ export function BookingForm({ services, areas }: Props) {
       if (!form.preferredTime) e.preferredTime = "Choose an available time slot.";
     } else if (current === 2) {
       if (!form.area) e.area = "Choose a service area.";
+      if (form.area === "other" && form.areaCustom.trim().length < 2) {
+        e.areaCustom = "Enter your parish, town, or region.";
+      }
       if (form.address.trim().length < 6) e.address = "A full address helps us plan the visit.";
     } else if (current === 3) {
       if (form.name.trim().length < 2) e.name = "Please share your name.";
@@ -126,7 +137,7 @@ export function BookingForm({ services, areas }: Props) {
 
   async function submit() {
     if (!form.consent) {
-      setErrors({ consent: "Please acknowledge the booking terms to continue." });
+      setErrors({ consent: "Please acknowledge the reservation terms to continue." });
       return;
     }
     setSubmitting(true);
@@ -202,7 +213,12 @@ export function BookingForm({ services, areas }: Props) {
             />
           )}
           {step === 2 && (
-            <StepWhere form={form} areas={areas} errors={errors} update={update} />
+            <StepWhere
+              form={form}
+              areas={areas}
+              errors={errors}
+              update={update}
+            />
           )}
           {step === 3 && (
             <StepContact form={form} errors={errors} update={update} />
@@ -212,7 +228,6 @@ export function BookingForm({ services, areas }: Props) {
               form={form}
               currency={currency}
               service={selectedService}
-              areas={areas}
               onConsent={(v) => update("consent", v)}
               error={errors.consent}
             />
@@ -246,7 +261,7 @@ export function BookingForm({ services, areas }: Props) {
       </div>
 
       <aside className="lg:col-span-4">
-        <Summary form={form} currency={currency} service={selectedService} areas={areas} />
+        <Summary form={form} currency={currency} service={selectedService} />
       </aside>
     </div>
   );
@@ -400,8 +415,8 @@ function StepWhen({
       <div>
         <legend className="font-serif text-2xl text-[var(--kh-brown)]">Pick your day and time</legend>
         <p className="mt-1 text-[var(--kh-brown-soft)]">
-          {service.name} · {service.durationMinutes} minutes. Jordan books quickly, so grab a slot
-          that works before you fill out the rest.
+          {service.name} · {service.durationMinutes} minutes. Jordan&rsquo;s calendar fills
+          quickly, so grab a time that works before you fill out the rest.
         </p>
       </div>
 
@@ -442,7 +457,7 @@ function StepWhen({
             <SlotSkeleton />
           ) : slots && availableCount === 0 ? (
             <p className="text-sm text-[var(--kh-brown-soft)]">
-              Jordan is booked solid on this date. Try another day, weekends fill first.
+              That date is fully reserved. Try another day; weekends fill first.
             </p>
           ) : slots ? (
             <div
@@ -464,7 +479,7 @@ function StepWhen({
                     title={
                       disabled
                         ? slot.reason === "booked"
-                          ? "Already booked"
+                          ? "Already reserved"
                           : slot.reason === "past"
                           ? "Time has passed"
                           : "Outside service hours"
@@ -520,7 +535,7 @@ function StepWhere({
     <fieldset className="grid gap-5">
       <legend className="font-serif text-2xl text-[var(--kh-brown)]">Where Jordan is coming to</legend>
       <div>
-        <label className="kh-label" htmlFor="area">Service area</label>
+        <label className="kh-label" htmlFor="area">Parish / region</label>
         <select
           id="area"
           className="kh-select"
@@ -533,6 +548,27 @@ function StepWhere({
         </select>
         {errors.area ? <p className="kh-error">{errors.area}</p> : null}
       </div>
+
+      {form.area === "other" ? (
+        <div>
+          <label className="kh-label" htmlFor="areaCustom">
+            Your location
+          </label>
+          <input
+            id="areaCustom"
+            type="text"
+            className="kh-input"
+            placeholder="e.g. Negril, Ocho Rios, Port Antonio, rural St. Ann…"
+            value={form.areaCustom}
+            onChange={(e) => update("areaCustom", e.target.value)}
+            autoComplete="address-level2"
+          />
+          <p className="kh-help">
+            Tell us which parish, town, or property area so we can confirm travel and timing.
+          </p>
+          {errors.areaCustom ? <p className="kh-error">{errors.areaCustom}</p> : null}
+        </div>
+      ) : null}
 
       <div>
         <label className="kh-label" htmlFor="address">Full service address</label>
@@ -632,18 +668,16 @@ function StepReview({
   form,
   currency,
   service,
-  areas,
   onConsent,
   error,
 }: {
   form: FormState;
   currency: QuoteCurrency;
   service: Service;
-  areas: { id: string; label: string }[];
   onConsent: (v: boolean) => void;
   error?: string;
 }) {
-  const areaLabel = areas.find((a) => a.id === form.area)?.label || form.area;
+  const areaLabel = formatServiceAreaLabel(form.area, form.areaCustom);
   const tMin = parseHHMM(form.preferredTime);
   const window =
     tMin != null
@@ -687,7 +721,7 @@ function StepReview({
           I understand this is a reservation request. Jordan will confirm by message within 24
           hours. I&rsquo;ve shared accurate contact details and a safe, private space for the
           session. I agree to the{" "}
-          <Link href="#faq" className="kh-link">cancellation window</Link> (12 hours).
+          <Link href="/#faq" className="kh-link">cancellation policy</Link> (24 hours).
         </span>
       </label>
       {error ? <p className="kh-error mt-2">{error}</p> : null}
@@ -699,14 +733,12 @@ function Summary({
   form,
   currency,
   service,
-  areas,
 }: {
   form: FormState;
   currency: QuoteCurrency;
   service?: Service;
-  areas: { id: string; label: string }[];
 }) {
-  const areaLabel = areas.find((a) => a.id === form.area)?.label || "-";
+  const areaLabel = formatServiceAreaLabel(form.area, form.areaCustom);
   const tMin = parseHHMM(form.preferredTime);
   const whenLine =
     form.preferredDate && tMin != null && service

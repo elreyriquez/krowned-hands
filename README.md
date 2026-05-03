@@ -120,7 +120,7 @@ written to the server log.
 | ----------------------- | -------------------------------------------------------- |
 | `RESEND_API_KEY`        | Enables email via [Resend](https://resend.com).          |
 | `BOOKINGS_EMAIL`        | Inbox that receives new-reservation emails (required with Resend). |
-| `BOOKINGS_FROM_EMAIL`   | Optional "from" address. Defaults to `bookings@krownedhands.com`. |
+| `BOOKINGS_FROM_EMAIL`   | Optional "from" address for Resend. Defaults to `krownedhands@gmail.com` (same as public contact; verify this sender in Resend if needed). |
 | `BOOKINGS_WEBHOOK_URL`  | Generic `POST` webhook (Zapier, Make, n8n, Slack). Receives the full JSON record. |
 
 The notifier fails open — a notification failure never breaks the reservation.
@@ -161,8 +161,7 @@ Typography:
 - "Krowned" / flourish — Great Vibes (`font-script`)
 - Body / UI — Inter (`font-sans`)
 
-Watercolor backdrop is a pure-CSS composition (`.kh-watercolor`) — no images,
-GPU-friendly, and respects `prefers-reduced-motion`.
+The home hero uses a **flat cream** field (`.kh-hero-ground`) behind portrait and copy. Other sections can use the watercolor-style backdrop (`.kh-watercolor`) — pure CSS, no images, GPU-friendly, and it respects `prefers-reduced-motion`.
 
 ---
 

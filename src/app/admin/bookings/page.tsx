@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { isAdminRequest, signOut } from "@/lib/auth";
 import { readAll } from "@/lib/bookings";
+import { formatServiceAreaLabel } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +26,17 @@ export default async function AdminBookingsPage() {
             {all.length} total · most recent first
           </p>
         </div>
-        <form action={handleSignOut}>
-          <button className="kh-btn kh-btn-ghost !py-2 !px-4 !min-h-0 text-sm">Sign out</button>
-        </form>
+        <div className="flex flex-wrap items-center gap-3">
+          <a
+            href="/api/admin/bookings-csv"
+            className="kh-btn kh-btn-primary !py-2 !px-4 !min-h-0 text-sm"
+          >
+            Download CSV ledger
+          </a>
+          <form action={handleSignOut}>
+            <button className="kh-btn kh-btn-ghost !py-2 !px-4 !min-h-0 text-sm">Sign out</button>
+          </form>
+        </div>
       </div>
 
       {all.length === 0 ? (
@@ -82,11 +91,11 @@ export default async function AdminBookingsPage() {
                         ? `${b.preferredTime}${
                             b.preferredWindow ? ` · ${b.preferredWindow}` : ""
                           }`
-                        : b.preferredWindow || "—"}
+                        : b.preferredWindow || "-"}
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="capitalize">{b.area.replace("-", " ")}</div>
+                    <div>{formatServiceAreaLabel(b.area, b.areaCustom)}</div>
                     <div className="text-xs text-[var(--kh-brown-soft)] max-w-xs">{b.address}</div>
                     {b.addressNotes ? (
                       <div className="text-[11px] text-[var(--kh-brown-soft)] italic mt-1">
@@ -106,9 +115,10 @@ export default async function AdminBookingsPage() {
       )}
 
       <p className="mt-6 text-xs text-[var(--kh-brown-soft)]">
-        Data is stored locally at <code>.data/bookings.json</code>. Configure{" "}
+        Primary store: <code>.data/bookings.json</code>. Bookkeeping ledger (same data, chronological):{" "}
+        <code>.data/bookings-ledger.csv</code> (updated whenever a reservation is submitted). Configure{" "}
         <code>RESEND_API_KEY</code> + <code>BOOKINGS_EMAIL</code> or{" "}
-        <code>BOOKINGS_WEBHOOK_URL</code> to get notified instantly.
+        <code>BOOKINGS_WEBHOOK_URL</code> for email alerts.
       </p>
     </div>
   );

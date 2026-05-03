@@ -6,7 +6,7 @@ import { publicServices, SERVICE_AREAS } from "@/lib/services";
 export const metadata: Metadata = {
   title: "Reserve a Session",
   description:
-    "Reserve a mobile massage session with Krowned Hands in Kingston or Montego Bay. Pain relief, deep recovery, or nervous system reset.",
+    "Reserve mobile massage with Jordan in Kingston, Montego Bay, or across Jamaica. In-home, hotel, villa, and resort sessions. Therapeutic bodywork by reservation.",
 };
 
 export default function BookPage() {
@@ -25,7 +25,7 @@ export default function BookPage() {
         </div>
 
         <div className="mt-10">
-          <Suspense fallback={<div className="kh-card">Loading booking form…</div>}>
+          <Suspense fallback={<div className="kh-card">Loading reservation form…</div>}>
             <BookingForm
               services={services}
               areas={SERVICE_AREAS.map((a) => ({ id: a.id, label: a.label }))}
@@ -35,12 +35,12 @@ export default function BookPage() {
 
         <div className="mt-14 rounded-2xl border border-[var(--kh-line)] bg-[var(--kh-cream-soft)] p-6 md:p-8">
           <h2 className="font-serif text-2xl text-[var(--kh-brown)] md:text-3xl">
-            Booking & payment
+            Reservation & deposit
           </h2>
           <ul className="mt-4 space-y-3 text-[var(--kh-brown-soft)] leading-relaxed list-disc pl-5">
             <li>
               A 50% deposit is required to confirm your reservation and must be made within 24 hours
-              of booking.
+              after you submit your request.
             </li>
             <li>
               Deposits are non-refundable, except in the event of a fault on the service

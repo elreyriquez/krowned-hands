@@ -57,9 +57,23 @@ export const SERVICES: Service[] = [
 export const SERVICE_AREAS = [
   { id: "kingston", label: "Kingston" },
   { id: "montego-bay", label: "Montego Bay" },
+  { id: "other", label: "Other" },
 ] as const;
 
 export type ServiceAreaId = (typeof SERVICE_AREAS)[number]["id"];
+
+/** Label for UI tables and emails; includes custom parish/region when area is "other". */
+export function formatServiceAreaLabel(
+  areaId: string,
+  areaCustom?: string | null,
+): string {
+  if (areaId === "other") {
+    const extra = areaCustom?.trim();
+    return extra ? `Other · ${extra}` : "Other";
+  }
+  const row = SERVICE_AREAS.find((a) => a.id === areaId);
+  return row?.label ?? areaId.replace(/-/g, " ");
+}
 
 export function findService(id: string): Service | undefined {
   return SERVICES.find((s) => s.id === id);

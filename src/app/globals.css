@@ -106,6 +106,12 @@ body {
   opacity: 0.7;
 }
 
+/* Home hero only: flat cream so the portrait and type sit on a calm field
+   (full watercolor treatment stays on other sections that use .kh-watercolor). */
+.kh-hero-ground {
+  background-color: var(--kh-cream);
+}
+
 .kh-gold-rule {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--kh-gold) 50%, transparent);

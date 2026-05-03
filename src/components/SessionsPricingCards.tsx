@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useQuoteCurrency } from "@/components/CurrencyProvider";
+import { SITE_CONTACT_EMAIL } from "@/lib/external-links";
 import { QuoteCurrencyToggle } from "@/components/QuoteCurrencyToggle";
 import { dualPriceLabels } from "@/lib/pricing";
 import type { Service } from "@/lib/services";
@@ -34,7 +35,7 @@ export function SessionsPricingCards({ services }: Props) {
         <div className="flex flex-wrap items-center gap-4 md:flex-col md:items-end lg:flex-row lg:items-center">
           <QuoteCurrencyToggle variant="dark" />
           <Link href="/book" className="kh-btn kh-btn-gold shrink-0">
-            Start a booking
+            Reserve a session
           </Link>
         </div>
       </div>
@@ -71,8 +72,20 @@ export function SessionsPricingCards({ services }: Props) {
         })}
       </div>
       <p className="mt-6 text-sm text-[var(--kh-cream)]/70">
-        Toggle USD or JMD above. Travel within Kingston and Montego Bay is included; out-of-parish
-        travel may carry a small fee. We&rsquo;ll confirm before your visit.
+        Krowned Hands serves Kingston and Montego Bay as home bases, with
+        sessions across Jamaica, including hotels, villas, and resorts in Negril, Ocho Rios, and
+        Port Antonio by arrangement. Out-of-parish travel may carry a small fee; we&rsquo;ll confirm
+        before your visit.
+      </p>
+      <p className="mt-4 text-sm text-[var(--kh-cream)]/85 border-t border-white/10 pt-6">
+        Packages and corporate bookings available: enquire via WhatsApp or{" "}
+        <a
+          className="text-[var(--kh-gold)] underline decoration-white/25 underline-offset-4 hover:text-[var(--kh-cream)]"
+          href={`mailto:${SITE_CONTACT_EMAIL}`}
+        >
+          email
+        </a>
+        .
       </p>
     </>
   );

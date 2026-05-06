@@ -1,17 +1,15 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { appendToDb, readAllFromDb } from "./bookings-db";
 
 /**
- * Simple file-based booking store.
+ * Booking persistence.
  *
- * Why JSON-on-disk for v1:
- *  - Zero native deps, works on any host with a writable FS.
- *  - Easy to back up, grep, and migrate into a real DB later.
- *
- * For production behind serverless (Vercel, Netlify), swap `readAll`/`append`
- * to use Vercel Blob, Supabase, Neon, or SQLite via Turso. The shape of
- * `BookingRecord` stays the same.
+ * - **Production:** Set `DATABASE_URL` (PostgreSQL). Data lives in the `bookings`
+ *   table — survives deploys and restarts (e.g. Railway Postgres).
+ * - **Local dev without Postgres:** Omit `DATABASE_URL` — falls back to
+ *   `.data/bookings.json` + CSV ledger (same as before).
  */
 
 export type BookingStatus = "new" | "confirmed" | "cancelled";
@@ -45,6 +43,10 @@ export type BookingRecord = {
   message?: string;
   consent: boolean;
 };
+
+function persistWithPostgres(): boolean {
+  return Boolean(process.env.DATABASE_URL?.trim());
+}
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const DATA_FILE = path.join(DATA_DIR, "bookings.json");
@@ -136,6 +138,9 @@ async function ensureStore(): Promise<void> {
 }
 
 export async function readAll(): Promise<BookingRecord[]> {
+  if (persistWithPostgres()) {
+    return readAllFromDb();
+  }
   await ensureStore();
   const raw = await fs.readFile(DATA_FILE, "utf8");
   try {
@@ -149,6 +154,9 @@ export async function readAll(): Promise<BookingRecord[]> {
 export async function append(
   data: Omit<BookingRecord, "id" | "createdAt" | "status">,
 ): Promise<BookingRecord> {
+  if (persistWithPostgres()) {
+    return appendToDb(data);
+  }
   await ensureStore();
   const record: BookingRecord = {
     ...data,

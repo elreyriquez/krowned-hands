@@ -13,8 +13,9 @@ replaces the previous Calendly link.
 - **Tailwind CSS v4** with brand tokens defined in `globals.css` (`@theme`).
   No extra UI dependency; everything visual is bespoke so the brand reads as a
   boutique studio, not a generic template.
-- **File-based JSON store** for booking records (`.data/bookings.json`).
-  Zero native deps, easy to migrate; see "Booking data & storage" below.
+- **PostgreSQL** for booking records when `DATABASE_URL` is set (recommended for
+  production on Railway). Falls back to **`.data/bookings.json`** locally if you
+  omit `DATABASE_URL`; see "Booking data & storage" below.
 - **Next built-in `next/font`** for Playfair Display (serif), Inter (sans),
   and Great Vibes (script for the _Krowned_ accent).
 
@@ -77,36 +78,37 @@ npm start
 
 ## Booking data & storage
 
-Records are persisted to `./.data/bookings.json` (git-ignored).
-See `src/lib/bookings.ts` for the full shape:
+**Production (recommended):** add a PostgreSQL database and set **`DATABASE_URL`**
+in Railway (or any host). On first request the app creates a **`bookings`**
+table automatically. Reservations persist across deploys and container restarts.
 
-```ts
-type BookingRecord = {
-  id: string;              // uuid
-  createdAt: string;       // ISO timestamp
-  status: "new" | "confirmed" | "cancelled";
-  serviceId: string;       // e.g. "signature-60"
-  serviceName: string;
-  durationMinutes: number;
-  priceUsd: number;
-  area: string;            // "kingston" | "montego-bay"
-  address: string;
-  addressNotes?: string;
-  preferredDate: string;   // YYYY-MM-DD
-  preferredWindow: string; // e.g. "Morning · 8:00 AM – 11:00 AM"
-  name: string;
-  email: string;
-  phone: string;
-  message?: string;
-  consent: true;
-};
+**Local development:** leave **`DATABASE_URL` unset** and records go to
+**`./.data/bookings.json`** (git-ignored), same as before.
+
+Implementation: `src/lib/bookings.ts` (API) + `src/lib/bookings-db.ts` (Postgres).
+
+### Railway
+
+1. In your Railway project, **New** → **Database** → **PostgreSQL**.
+2. Link the DB to the web service (or copy **`DATABASE_URL`** / **`POSTGRES_URL`**
+   from the Postgres service variables).
+3. Redeploy. If the plugin exposes only `POSTGRES_URL`, set
+   **`DATABASE_URL`** on the Next.js service to that value (same connection string).
+
+### Migrating old JSON into Postgres
+
+If you still have historical rows in `.data/bookings.json`:
+
+```bash
+DATABASE_URL="postgresql://..." npm run migrate:bookings
 ```
 
-### Swapping to a real database
+Duplicate IDs are skipped (`ON CONFLICT DO NOTHING`).
 
-Replace `readAll` and `append` in `src/lib/bookings.ts`. Everything else
-already speaks this shape — including the admin page and the notifier.
-Recommended production targets: Supabase, Neon, Turso (libSQL), or Vercel Postgres.
+### Record shape
+
+See `BookingRecord` in `src/lib/bookings.ts` — includes service, pricing,
+**`preferredTime`**, optional **`areaCustom`**, etc.
 
 ---
 
@@ -186,7 +188,7 @@ The form stores the fields shown above. For production you should:
 
 1. Link to a short privacy page in the footer (currently TODO).
 2. Confirm retention policy (how long reservations live in the store).
-3. If hosting on shared infrastructure, move `.data/` onto a managed DB.
+3. Use **`DATABASE_URL`** (PostgreSQL) in production so reservations are not tied to ephemeral disk.
 
 ---
 
@@ -213,7 +215,8 @@ src/
     BookingForm.tsx          # multi-step, client-side
   lib/
     services.ts              # session catalog (edit pricing/durations here)
-    bookings.ts              # JSON-file store, easy to swap
+    bookings.ts              # persistence API (Postgres or `.data/` fallback)
+    bookings-db.ts           # PostgreSQL implementation
     validation.ts            # server-side validation (used by API)
     auth.ts                  # admin cookie sign/verify
     notify.ts                # Resend / webhook notifier (best-effort)

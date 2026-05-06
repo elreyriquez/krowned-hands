@@ -93,7 +93,7 @@ export default function HomePage() {
             </h2>
             <hr className="kh-gold-rule mx-auto my-6" />
             <p className="text-[var(--kh-brown-soft)] leading-relaxed">
-              Every reservation is tailored, but most sessions move through one of these three lenses.
+              Every reservation is tailored, but most sessions move through one or more of these three lenses.
               Tell us where you are today; we&rsquo;ll meet you there.
             </p>
           </Reveal>

@@ -49,13 +49,22 @@ export async function isAdminRequest(): Promise<boolean> {
   return verifyToken(store.get(COOKIE_NAME)?.value);
 }
 
-export async function signIn(password: string): Promise<boolean> {
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected || !password) return false;
-  const a = Buffer.from(password);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length) return false;
-  if (!crypto.timingSafeEqual(a, b)) return false;
+export async function signIn(username: string, password: string): Promise<boolean> {
+  const expectedUser = process.env.ADMIN_USERNAME || "krownedhands";
+  const expectedPass = process.env.ADMIN_PASSWORD;
+  if (!expectedPass || !username || !password) return false;
+
+  const uA = Buffer.from(username.toLowerCase());
+  const uB = Buffer.from(expectedUser.toLowerCase());
+  const userMatch =
+    uA.length === uB.length && crypto.timingSafeEqual(uA, uB);
+
+  const pA = Buffer.from(password);
+  const pB = Buffer.from(expectedPass);
+  const passMatch =
+    pA.length === pB.length && crypto.timingSafeEqual(pA, pB);
+
+  if (!userMatch || !passMatch) return false;
   const store = await cookies();
   store.set(COOKIE_NAME, makeToken(), {
     httpOnly: true,

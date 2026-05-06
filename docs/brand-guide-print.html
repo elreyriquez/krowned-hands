@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Krowned Hands — Brand style guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #f7efe2;
+      --cream-soft: #fbf5ea;
+      --sand: #ecdcc1;
+      --ochre: #c89a5b;
+      --gold: #b88a4a;
+      --gold-deep: #8f6a33;
+      --brown: #3b2419;
+      --brown-soft: #5a3a2a;
+      --charcoal: #141210;
+      --ink: #24201d;
+      --line: #e5d6bf;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, sans-serif;
+      font-size: 10pt;
+      line-height: 1.5;
+      color: var(--ink);
+      background: var(--cream);
+      -webkit-font-smoothing: antialiased;
+    }
+    .cover {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px 36px;
+      background: var(--cream);
+      border-bottom: 1px solid var(--line);
+    }
+    .cover .lockup { max-width: 380px; margin-bottom: 32px; }
+    .cover .lockup img { display: block; margin: 0 auto 16px; width: 88px; height: auto; }
+    .cover .lockup img.word { width: min(320px, 88vw); height: auto; }
+    .cover h1 {
+      font-family: "Playfair Display", Georgia, serif;
+      font-weight: 600;
+      font-size: 1.85rem;
+      color: var(--brown);
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .cover p.lead {
+      font-size: 0.95rem;
+      color: var(--brown-soft);
+      max-width: 400px;
+      margin: 0;
+    }
+    .page {
+      max-width: min(1040px, 100%);
+      margin: 0 auto;
+      padding: 36px 32px 48px;
+    }
+    h2 {
+      font-family: "Playfair Display", Georgia, serif;
+      font-weight: 600;
+      font-size: 1.35rem;
+      color: var(--brown);
+      margin: 2rem 0 0.75rem;
+      letter-spacing: -0.01em;
+      page-break-after: avoid;
+    }
+    h2:first-of-type { margin-top: 0; }
+    p { margin: 0.5rem 0; color: var(--brown-soft); }
+    .section-break { page-break-before: always; padding-top: 8px; }
+    .rule {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold) 45%, transparent);
+      margin: 1.25rem 0;
+      border: 0;
+    }
+
+    /* Color swatches */
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 12px 0 8px;
+    }
+    @media (max-width: 720px) { .swatch-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 520px) { .swatch-grid { grid-template-columns: repeat(2, 1fr); } }
+    .swatch {
+      border-radius: 12px;
+      min-height: 72px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      border: 1px solid rgba(59,36,25,0.08);
+      font-size: 8pt;
+      line-height: 1.35;
+    }
+    .swatch span.name { font-weight: 600; color: inherit; }
+    .swatch span.codes { opacity: 0.88; font-size: 7.5pt; margin-top: 4px; }
+    .swatch.on-dark { color: var(--cream); border-color: rgba(255,255,255,0.15); }
+
+    /* Typography blocks */
+    .type-spec {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px 22px;
+      margin: 12px 0;
+      background: var(--cream-soft);
+    }
+    .type-spec .label {
+      font-family: "Inter", system-ui, sans-serif;
+      font-size: 7.5pt;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold-deep);
+      margin-bottom: 10px;
+    }
+    .type-spec .sample-playfair {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 28pt;
+      font-weight: 500;
+      color: var(--brown);
+      line-height: 1.15;
+    }
+    .type-spec .sample-inter {
+      font-family: "Inter", system-ui, sans-serif;
+      font-size: 11pt;
+      font-weight: 400;
+      color: var(--brown-soft);
+      line-height: 1.55;
+    }
+    .type-spec .sample-script {
+      font-family: "Great Vibes", cursive;
+      font-size: 36pt;
+      color: var(--gold-deep);
+      line-height: 1.1;
+    }
+
+    /* Logo do / don't */
+    .logo-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .logo-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      background: #fff;
+    }
+    .logo-box.bad {
+      background: repeating-linear-gradient(45deg, #f0ebe4, #f0ebe4 6px, #e8e0d6 6px, #e8e0d6 12px);
+    }
+    .logo-box h4 {
+      margin: 0 0 12px;
+      font-size: 8pt;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-deep);
+      font-family: "Inter", sans-serif;
+      font-weight: 600;
+    }
+    .logo-box img { max-width: 100%; height: auto; max-height: 48px; width: auto; }
+    .logo-box.bad img.word-bad { opacity: 0.85; transform: scaleX(1.18); filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.2)); }
+
+    .dark-strip {
+      background: var(--charcoal);
+      color: var(--cream);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin: 14px 0;
+      font-size: 9pt;
+      line-height: 1.5;
+    }
+    .dark-strip strong { color: #fff; }
+
+    .mood-keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      margin: 8px 0 14px;
+      font-family: "Inter", system-ui, sans-serif;
+      font-size: 8.5pt;
+    }
+    .mood-keywords span {
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--gold-deep);
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--cream-soft);
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 10px 0 4px;
+      page-break-inside: avoid;
+    }
+    .photo-tile {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--cream-soft);
+      line-height: 0;
+    }
+    .photo-tile img {
+      width: 100%;
+      height: 132px;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* A4 landscape — matches most print brand decks */
+    @page { size: A4 landscape; margin: 12mm 14mm; }
+    @media print {
+      .cover {
+        min-height: 186mm;
+        padding: 20mm 18mm 16mm;
+        page-break-after: always;
+        box-sizing: border-box;
+      }
+      .swatch-grid { grid-template-columns: repeat(4, 1fr); }
+      .photo-tile img { height: 46mm; }
+      body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="cover">
+    <div class="lockup">
+      <img src="../public/brand/logo-mark.png" alt="" width="200" height="234" />
+      <img class="word" src="../public/brand/logo-type.png" alt="Krowned Hands" width="1690" height="391" />
+    </div>
+    <h1>Brand style guide</h1>
+    <p class="lead">Mobile massage and bodywork in Kingston and Montego Bay. Use this guide so every touchpoint feels like the same calm, premium practice.</p>
+  </header>
+
+  <div class="page">
+    <h2>Who we are</h2>
+    <p><strong>Positioning.</strong> Transformational body work: pain relief, deep recovery, and nervous system reset, delivered in the client’s space.</p>
+    <p><strong>Personality.</strong> Warm, grounded, confident, clear. Premium without feeling cold or corporate.</p>
+    <p><strong>Imagery.</strong> Favor visuals that feel <strong>relaxed, peaceful, calm, and happy</strong>—warm light, ease in the body, and quiet joy rather than stiff or clinical scenes.</p>
+    <div class="rule"></div>
+
+    <h2 class="section-break">Color palette</h2>
+    <p>Primary surfaces stay in warm cream and chocolate brown. Gold and ochre are accents, not floods. For print, match these screens to ink with your printer’s profile.</p>
+    <div class="swatch-grid">
+      <div class="swatch" style="background:#f7efe2;color:#3b2419"><span class="name">Cream</span><span class="codes">HEX #F7EFE2 · RGB 247, 239, 226</span></div>
+      <div class="swatch" style="background:#fbf5ea;color:#3b2419"><span class="name">Cream soft</span><span class="codes">HEX #FBF5EA · RGB 251, 245, 234</span></div>
+      <div class="swatch" style="background:#ecdcc1;color:#3b2419"><span class="name">Sand</span><span class="codes">HEX #ECDCC1 · RGB 236, 220, 193</span></div>
+      <div class="swatch on-dark" style="background:#b88a4a"><span class="name">Champagne gold</span><span class="codes">HEX #B88A4A · RGB 184, 138, 74</span></div>
+      <div class="swatch" style="background:#c89a5b;color:#3b2419"><span class="name">Ochre</span><span class="codes">HEX #C89A5B · RGB 200, 154, 91</span></div>
+      <div class="swatch on-dark" style="background:#8f6a33"><span class="name">Gold deep</span><span class="codes">HEX #8F6A33 · RGB 143, 106, 51</span></div>
+      <div class="swatch on-dark" style="background:#3b2419"><span class="name">Chocolate</span><span class="codes">HEX #3B2419 · RGB 59, 36, 25</span></div>
+      <div class="swatch on-dark" style="background:#5a3a2a"><span class="name">Brown soft</span><span class="codes">HEX #5A3A2A · RGB 90, 58, 42</span></div>
+      <div class="swatch on-dark" style="background:#141210"><span class="name">Charcoal</span><span class="codes">HEX #141210 · RGB 20, 18, 16</span></div>
+    </div>
+    <p style="font-size:8.5pt;margin-top:8px">Hairlines and borders use a warm neutral line at approximately HEX #E5D6BF.</p>
+
+    <h2 class="section-break">Typography</h2>
+    <p>Three families. Headlines feel editorial; body stays highly readable; script is for short accents only.</p>
+    <div class="type-spec">
+      <div class="label">Headlines · Playfair Display</div>
+      <div class="sample-playfair">Transformational body work</div>
+    </div>
+    <div class="type-spec">
+      <div class="label">Body &amp; UI · Inter</div>
+      <div class="sample-inter">Krowned Hands brings therapeutic massage to your home, hotel, or villa. We confirm your window by message, arrive with the full setup, and leave you with clear aftercare. Weights in use: regular, medium, semibold, bold.</div>
+    </div>
+    <div class="type-spec">
+      <div class="label">Accent script · Great Vibes</div>
+      <div class="sample-script">body work</div>
+    </div>
+
+    <h2 class="section-break">Logo</h2>
+    <p>Use the approved mark and wordmark together or the mark alone where space is tight. Keep clear space around the lockup at least equal to the height of the crown in the mark. Do not stretch, recolor, or add effects to the logo files.</p>
+    <div class="logo-row">
+      <div class="logo-box">
+        <h4>Correct</h4>
+        <img src="../public/brand/logo-mark.png" alt="" /><br /><br />
+        <img src="../public/brand/logo-type.png" alt="Krowned Hands" style="max-height:36px" />
+      </div>
+      <div class="logo-box bad">
+        <h4>Avoid</h4>
+        <img src="../public/brand/logo-mark.png" alt="" /><br /><br />
+        <img class="word-bad" src="../public/brand/logo-type.png" alt="" style="max-height:36px" />
+        <p style="font-size:7.5pt;margin:10px 0 0;color:#8a2f1f">No horizontal stretch, drop shadows, or off-palette fills.</p>
+      </div>
+    </div>
+
+    <h2 class="section-break">Photography &amp; imagery</h2>
+    <p>Use natural light, tactile detail, and real environments when they support the story. Portraits and treatment shots should read as <strong>relaxed, peaceful, calm, and happy</strong>—never rushed, cold, or overly posed. Rounded corners and a light frame match the site.</p>
+    <p class="mood-keywords" aria-label="Imagery mood keywords">
+      <span>Relaxed</span><span>Peaceful</span><span>Calm</span><span>Happy</span>
+    </p>
+    <div class="photo-grid">
+      <div class="photo-tile"><img src="brand-guide-assets/example-massage-outdoor.png" alt="Example: massage in soft outdoor light" /></div>
+      <div class="photo-tile"><img src="brand-guide-assets/example-sunset-horizon.png" alt="Example: calm sunset over water" /></div>
+      <div class="photo-tile"><img src="brand-guide-assets/example-beach-palms.png" alt="Example: warm tropical shoreline at golden hour" /></div>
+      <div class="photo-tile"><img src="brand-guide-assets/example-massage-studio.png" alt="Example: warm indoor massage with candles" /></div>
+    </div>
+    <p style="font-size:8.5pt;color:var(--brown-soft);margin-top:10px">Stock photos shown as <strong>directional examples</strong> only; swap in your own photography when available.</p>
+
+    <h2 class="section-break">Dark accents and counter balance</h2>
+    <div class="dark-strip">
+      Let warm cream carry most of the story, then use <strong>charcoal</strong> as a deliberate counter balance for emphasis: testimonials, pricing, booking, and key CTAs. Pair charcoal with <strong>cream type</strong> and <strong>gold</strong> accents so the dark reads premium, not flat. A very soft, blurred gold glow behind content (low opacity) keeps the accent warm rather than loud.
+    </div>
+  </div>
+</body>
+</html>

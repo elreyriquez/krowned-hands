@@ -86,6 +86,7 @@ export function BookingForm({ services, areas }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<{ id: string } | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const selectedService = services.find((s) => s.id === form.serviceId);
 
@@ -156,6 +157,7 @@ export function BookingForm({ services, areas }: Props) {
         return;
       }
       setConfirmation({ id: data.id });
+      setModalOpen(true);
       setStep(4);
       router.replace("/book?confirmed=1", { scroll: true });
     } catch {
@@ -165,7 +167,19 @@ export function BookingForm({ services, areas }: Props) {
   }
 
   if (confirmation) {
-    return <SuccessState id={confirmation.id} name={form.name} service={selectedService?.name} />;
+    return (
+      <>
+        {modalOpen && (
+          <ConfirmationModal
+            id={confirmation.id}
+            name={form.name}
+            service={selectedService?.name}
+            onClose={() => setModalOpen(false)}
+          />
+        )}
+        <SuccessState id={confirmation.id} name={form.name} service={selectedService?.name} />
+      </>
+    );
   }
 
   return (
@@ -781,6 +795,88 @@ function Row({ k, v }: { k: string; v: string }) {
     <div className="grid grid-cols-3 gap-3">
       <dt className="uppercase tracking-[0.14em] text-[11px] text-[var(--kh-brown-soft)]">{k}</dt>
       <dd className="col-span-2 text-[var(--kh-ink)] break-words">{v}</dd>
+    </div>
+  );
+}
+
+function ConfirmationModal({
+  id,
+  name,
+  service,
+  onClose,
+}: {
+  id: string;
+  name: string;
+  service?: string;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-5"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-heading"
+    >
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-[var(--kh-charcoal)]/70 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden
+      />
+
+      {/* Panel */}
+      <div
+        className="relative z-10 w-full max-w-md rounded-2xl bg-[var(--kh-cream)] px-8 py-10 text-center shadow-2xl"
+        style={{ animation: "kh-modal-in 0.28s cubic-bezier(0.34,1.56,0.64,1) both" }}
+      >
+        {/* Close */}
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute top-4 right-4 text-[var(--kh-brown-soft)] hover:text-[var(--kh-brown)] text-2xl leading-none transition"
+        >
+          ×
+        </button>
+
+        {/* Gold tick */}
+        <div
+          aria-hidden
+          className="mx-auto h-16 w-16 rounded-full flex items-center justify-center shadow-lg"
+          style={{ background: "linear-gradient(160deg, var(--kh-ochre), var(--kh-gold))", color: "var(--kh-brown)" }}
+        >
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M5 12l4 4 10-10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+
+        <h2 id="confirm-heading" className="mt-5 font-serif text-3xl text-[var(--kh-brown)]">
+          Reservation received{name ? `, ${name.split(" ")[0]}` : ""}.
+        </h2>
+
+        <p className="mt-3 text-[var(--kh-brown-soft)] leading-relaxed">
+          Your{" "}
+          {service ? <strong className="text-[var(--kh-brown)]">{service}</strong> : "session"}{" "}
+          request has been sent to Jordan. Expect a confirmation within 24 hours.
+        </p>
+
+        <p className="mt-4 text-xs tracking-[0.2em] uppercase text-[var(--kh-gold-deep)]">
+          Ref · {id.slice(0, 8).toUpperCase()}
+        </p>
+
+        <button
+          onClick={onClose}
+          className="kh-btn kh-btn-primary mt-8 w-full"
+        >
+          Got it
+        </button>
+      </div>
+
+      <style>{`
+        @keyframes kh-modal-in {
+          from { opacity: 0; transform: scale(0.88) translateY(12px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

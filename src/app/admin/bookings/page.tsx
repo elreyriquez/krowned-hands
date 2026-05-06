@@ -114,12 +114,6 @@ export default async function AdminBookingsPage() {
         </div>
       )}
 
-      <p className="mt-6 text-xs text-[var(--kh-brown-soft)]">
-        Primary store: <code>.data/bookings.json</code>. Bookkeeping ledger (same data, chronological):{" "}
-        <code>.data/bookings-ledger.csv</code> (updated whenever a reservation is submitted). Configure{" "}
-        <code>RESEND_API_KEY</code> + <code>BOOKINGS_EMAIL</code> or{" "}
-        <code>BOOKINGS_WEBHOOK_URL</code> for email alerts.
-      </p>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { append, readAll } from "@/lib/bookings";
+import { append, attachCalendlyInviteeToBooking, readAll } from "@/lib/bookings";
+import { createInviteeForBooking } from "@/lib/calendly-schedule";
 import { validateBooking } from "@/lib/validation";
 import { notifyNewBooking } from "@/lib/notify";
 import { isSlotBookable } from "@/lib/availability";
@@ -48,5 +49,20 @@ export async function POST(req: Request) {
   // Fire-and-forget; don't fail the request if notification fails.
   notifyNewBooking(record).catch((err) => console.error("[bookings.POST] notify error", err));
 
-  return NextResponse.json({ ok: true, id: record.id }, { status: 201 });
+  let calendlySynced = false;
+  try {
+    const created = await createInviteeForBooking(result.data);
+    if (created?.inviteeUri) {
+      await attachCalendlyInviteeToBooking(
+        record.id,
+        created.inviteeUri,
+        created.eventUri,
+      );
+      calendlySynced = true;
+    }
+  } catch (err) {
+    console.error("[bookings.POST] Calendly Scheduling API error", err);
+  }
+
+  return NextResponse.json({ ok: true, id: record.id, calendlySynced }, { status: 201 });
 }

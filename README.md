@@ -69,7 +69,7 @@ npm start
 | Route              | Purpose                                                                |
 | ------------------ | ---------------------------------------------------------------------- |
 | `/`                | Marketing home: hero, three pillars, services, about, how it works, testimonial strip, FAQ, CTA. |
-| `/book`            | Calendly embed when `NEXT_PUBLIC_CALENDLY_BOOKING_URL` is set; otherwise the in-app multi-step reservation form. |
+| `/book`            | Krowned Hands booking UI (`BookingForm`). Submits to `/api/bookings`; optionally embed Calendly above the form (`NEXT_PUBLIC_USE_CALENDLY_EMBED=true`). |
 | `/api/bookings`    | `POST` endpoint the form submits to. Validates, persists, notifies.   |
 | `/api/webhooks/calendly` | Receives Calendly events and syncs them into the booking store (for admin calendar/insights). |
 | `/api/admin/calendly-sync` | Admin-triggered Calendly API reconciliation (POST, auth cookie required). |
@@ -131,23 +131,33 @@ The notifier fails open — a notification failure never breaks the reservation.
 
 ---
 
-## Calendly mode (optional)
+## Calendly integration
 
-Set `NEXT_PUBLIC_CALENDLY_BOOKING_URL` to use Calendly directly on `/book`.
+### Website bookings → Calendly (Scheduling API)
 
-- Calendly becomes the booking source of truth.
-- The in-app form remains as automatic fallback when the URL is not set.
-- If you stay in Calendly mode, enable webhook sync so admin pages stay updated:
-  - Webhook URL: `https://your-domain.com/api/webhooks/calendly`
-  - Events to subscribe: `invitee.created`, `invitee.canceled`
-  - Set `CALENDLY_WEBHOOK_SIGNING_KEY` in env for signature verification (recommended).
-  - If no signing key is available, set `CALENDLY_WEBHOOK_TOKEN` and include it in webhook requests.
+The `/book` form saves locally **and** calls Calendly **`POST /invitees`** when configured ([Scheduling API overview](https://developer.calendly.com/schedule-events-with-ai-agents)).
 
-Set `CALENDLY_API_TOKEN` to enable API reconciliation:
+Production vars:
 
-- `/admin/bookings` includes a **Sync Calendly now** button.
-- This pulls recent scheduled events + invitees from Calendly and upserts them into local storage.
-- Use this to backfill historical appointments or recover from transient webhook delivery failures.
+- `CALENDLY_API_TOKEN` — PAT with scheduling scopes (paid Calendly plan).
+- `CALENDLY_EVENT_TYPE_URI` — or per-session `CALENDLY_EVENT_TYPE_URI_KROWNED_RESET_60` / `_RESTORE_90` / `_RENEW_120` (full URIs from `GET /event_types`).
+- `CALENDLY_BOOKING_LOCATION_KIND` — e.g. `ask_invitee` so mobile visits can pass `location.location` (address line). Use `omit` only if your event type requires **no** location object.
+
+`/api/bookings` responds with `{ calendlySynced: true }` when Calendly accepted the invitee.
+
+### Optional iframe above the form
+
+- `NEXT_PUBLIC_USE_CALENDLY_EMBED=true` and `NEXT_PUBLIC_CALENDLY_BOOKING_URL` — embed appears above the Krowned Hands form (still submits via API).
+
+### Calendly → website (webhooks + reconcile)
+
+- Webhook URL: `https://your-domain.com/api/webhooks/calendly`
+- Events: `invitee.created`, `invitee.canceled`
+- `CALENDLY_WEBHOOK_SIGNING_KEY` if shown in Calendly; otherwise optional `CALENDLY_WEBHOOK_TOKEN`.
+
+`/admin/bookings` → **Sync Calendly now** pulls recent events via API for backfill.
+
+Set `CALENDLY_API_TOKEN` with **`users:read`** plus scopes needed for `/invitees` and `/scheduled_events` ([Calendly API use cases](https://developer.calendly.com/api-use-cases)).
 
 ---
 

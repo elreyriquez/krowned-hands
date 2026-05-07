@@ -3,6 +3,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import {
   appendToDb,
+  attachCalendlyInviteeToBookingInDb,
   deleteByIdInDb,
   readAllFromDb,
   updateStatusInDb,
@@ -292,6 +293,39 @@ export async function deleteBooking(id: string): Promise<void> {
   await fs.writeFile(DATA_FILE, JSON.stringify(next, null, 2), "utf8");
   try {
     await writeLedgerCsv(next);
+  } catch (err) {
+    console.error("[bookings] ledger CSV write failed", err);
+  }
+}
+
+export async function attachCalendlyInviteeToBooking(
+  localId: string,
+  inviteeUri: string,
+  eventUri?: string,
+): Promise<void> {
+  if (persistWithPostgres()) {
+    await attachCalendlyInviteeToBookingInDb(localId, inviteeUri, eventUri);
+    return;
+  }
+  await ensureStore();
+  const all = await readAll();
+  const dup = all.find(
+    (b) => b.calendlyInviteeUri === inviteeUri && b.id !== localId,
+  );
+  if (dup) {
+    await deleteBooking(localId);
+    return;
+  }
+  const idx = all.findIndex((b) => b.id === localId);
+  if (idx < 0) return;
+  all[idx] = {
+    ...all[idx],
+    calendlyInviteeUri: inviteeUri,
+    calendlyEventUri: eventUri ?? all[idx].calendlyEventUri,
+  };
+  await fs.writeFile(DATA_FILE, JSON.stringify(all, null, 2), "utf8");
+  try {
+    await writeLedgerCsv(all);
   } catch (err) {
     console.error("[bookings] ledger CSV write failed", err);
   }

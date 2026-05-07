@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { BookingForm } from "@/components/BookingForm";
+import { publicServices, SERVICE_AREAS } from "@/lib/services";
 
 export const metadata: Metadata = {
   title: "Reserve a Session",
@@ -7,7 +10,11 @@ export const metadata: Metadata = {
 };
 
 export default function BookPage() {
-  const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_BOOKING_URL?.trim();
+  const services = publicServices();
+  const embedUrl = process.env.NEXT_PUBLIC_CALENDLY_BOOKING_URL?.trim();
+  const showEmbed =
+    process.env.NEXT_PUBLIC_USE_CALENDLY_EMBED === "true" && Boolean(embedUrl);
+
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-6xl px-5 md:px-8 pt-14 md:pt-20 pb-24">
@@ -21,33 +28,27 @@ export default function BookPage() {
           </h1>
         </div>
 
-        {calendlyUrl ? (
-          <div className="mt-10 space-y-5">
-            <div className="kh-card">
-              <p className="text-[var(--kh-brown-soft)] leading-relaxed">
-                Reserve directly through Jordan&apos;s live calendar below. Your booking details are
-                managed in Calendly so confirmations and scheduling stay in one place.
-              </p>
-            </div>
+        <div className="mt-10 space-y-8">
+          {showEmbed && embedUrl ? (
             <div className="overflow-hidden rounded-2xl border border-[var(--kh-line)] bg-white shadow-sm">
               <iframe
-                src={calendlyUrl}
-                title="Krowned Hands Calendly booking"
-                className="h-[880px] w-full md:h-[920px]"
+                src={embedUrl}
+                title="Calendly (optional embed)"
+                className="h-[520px] w-full md:h-[560px]"
                 loading="lazy"
               />
             </div>
+          ) : null}
+
+          <div>
+            <Suspense fallback={<div className="kh-card">Loading reservation form…</div>}>
+              <BookingForm
+                services={services}
+                areas={SERVICE_AREAS.map((a) => ({ id: a.id, label: a.label }))}
+              />
+            </Suspense>
           </div>
-        ) : (
-          <div className="mt-10 kh-card">
-            <p className="text-[var(--kh-brown)] font-medium">Booking is currently unavailable.</p>
-            <p className="mt-2 text-[var(--kh-brown-soft)]">
-              Calendly has not been configured yet. Please add
-              <code className="mx-1">NEXT_PUBLIC_CALENDLY_BOOKING_URL</code>
-              in production environment variables.
-            </p>
-          </div>
-        )}
+        </div>
 
         <div className="mt-14 rounded-2xl border border-[var(--kh-line)] bg-[var(--kh-cream-soft)] p-6 md:p-8">
           <h2 className="font-serif text-2xl text-[var(--kh-brown)] md:text-3xl">

@@ -326,3 +326,27 @@ export async function deleteByIdInDb(id: string): Promise<void> {
   const pool = await getPool();
   await pool.query(`DELETE FROM bookings WHERE id = $1`, [id]);
 }
+
+/** Attach Calendly URIs to the row created by our form. If webhook raced first, drop duplicate local row. */
+export async function attachCalendlyInviteeToBookingInDb(
+  localId: string,
+  inviteeUri: string,
+  eventUri?: string,
+): Promise<void> {
+  const pool = await getPool();
+  const dup = await pool.query<{ id: string }>(
+    `SELECT id FROM bookings WHERE calendly_invitee_uri = $1 LIMIT 1`,
+    [inviteeUri],
+  );
+  if (dup.rows[0]?.id && dup.rows[0].id !== localId) {
+    await pool.query(`DELETE FROM bookings WHERE id = $1`, [localId]);
+    return;
+  }
+  await pool.query(
+    `UPDATE bookings
+     SET calendly_invitee_uri = $2,
+         calendly_event_uri = COALESCE($3, calendly_event_uri)
+     WHERE id = $1`,
+    [localId, inviteeUri, eventUri ?? null],
+  );
+}

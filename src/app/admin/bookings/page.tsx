@@ -20,7 +20,12 @@ export default async function AdminBookingsPage() {
 
   async function handleCalendlySync() {
     "use server";
-    await syncCalendlyRecentBookings({ lookbackDays: 45, maxEvents: 120 });
+    try {
+      await syncCalendlyRecentBookings({ lookbackDays: 45, maxEvents: 120 });
+    } catch (err) {
+      // Never crash admin UI on a manual sync attempt.
+      console.error("[admin.bookings] calendly sync failed", err);
+    }
     redirect("/admin/bookings");
   }
 

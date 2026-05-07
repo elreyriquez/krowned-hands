@@ -58,6 +58,23 @@ function formatDateLong(iso: string): string {
   });
 }
 
+/** Guest-facing line when site ↔ Calendly sync fails (no secrets / raw API text). */
+function calendlyGuestWarning(code?: string): string {
+  switch (code) {
+    case "no_open_slots_that_day_in_calendly":
+      return "Your reservation was saved. That day may not have matched Jordan's live calendar — she'll confirm or suggest another time.";
+    case "calendly_available_times_failed":
+      return "Your reservation was saved. Calendar availability couldn't be checked automatically — Jordan will confirm your time.";
+    case "calendly_invitees_post_failed":
+      return "Your reservation was saved. Calendar booking couldn't finish automatically — Jordan will still confirm by message.";
+    case "skipped_missing_calendly_api_token":
+    case "skipped_missing_event_type_uri":
+      return "Your reservation was saved. Calendar sync isn't configured on the server yet — Jordan will confirm by message.";
+    default:
+      return "Your reservation was saved. Jordan will confirm your time (calendar sync may catch up separately).";
+  }
+}
+
 export function BookingForm({ services, areas }: Props) {
   const router = useRouter();
   const { currency } = useQuoteCurrency();
@@ -85,7 +102,11 @@ export function BookingForm({ services, areas }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  const [confirmation, setConfirmation] = useState<{ id: string } | null>(null);
+  const [confirmation, setConfirmation] = useState<{
+    id: string;
+    /** Shown when Calendly Scheduling API did not complete (booking still saved). */
+    calendlyWarning?: string;
+  } | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const selectedService = services.find((s) => s.id === form.serviceId);
@@ -156,9 +177,14 @@ export function BookingForm({ services, areas }: Props) {
         setSubmitting(false);
         return;
       }
-      setConfirmation({ id: data.id });
+      const calendlyWarning =
+        data.calendlySynced === false && data.calendlyError
+          ? calendlyGuestWarning(data.calendlyError.code)
+          : undefined;
+      setConfirmation({ id: data.id, calendlyWarning });
       setModalOpen(true);
       setStep(4);
+      setSubmitting(false);
       router.replace("/book?confirmed=1", { scroll: true });
     } catch {
       setServerError("Network error. Please try again.");
@@ -174,10 +200,16 @@ export function BookingForm({ services, areas }: Props) {
             id={confirmation.id}
             name={form.name}
             service={selectedService?.name}
+            calendlyWarning={confirmation.calendlyWarning}
             onClose={() => setModalOpen(false)}
           />
         )}
-        <SuccessState id={confirmation.id} name={form.name} service={selectedService?.name} />
+        <SuccessState
+          id={confirmation.id}
+          name={form.name}
+          service={selectedService?.name}
+          calendlyWarning={confirmation.calendlyWarning}
+        />
       </>
     );
   }
@@ -803,11 +835,13 @@ function ConfirmationModal({
   id,
   name,
   service,
+  calendlyWarning,
   onClose,
 }: {
   id: string;
   name: string;
   service?: string;
+  calendlyWarning?: string;
   onClose: () => void;
 }) {
   return (
@@ -863,6 +897,12 @@ function ConfirmationModal({
           Ref · {id.slice(0, 8).toUpperCase()}
         </p>
 
+        {calendlyWarning ? (
+          <p className="mt-4 rounded-xl bg-[var(--kh-sand)]/35 px-4 py-3 text-left text-sm text-[var(--kh-brown-soft)] leading-relaxed">
+            {calendlyWarning}
+          </p>
+        ) : null}
+
         <button
           onClick={onClose}
           className="kh-btn kh-btn-primary mt-8 w-full"
@@ -885,10 +925,12 @@ function SuccessState({
   id,
   name,
   service,
+  calendlyWarning,
 }: {
   id: string;
   name: string;
   service?: string;
+  calendlyWarning?: string;
 }) {
   return (
     <div className="kh-card text-center">
@@ -915,6 +957,11 @@ function SuccessState({
       <p className="mt-3 text-xs tracking-[0.18em] uppercase text-[var(--kh-gold-deep)]">
         Reservation ID · {id.slice(0, 8)}
       </p>
+      {calendlyWarning ? (
+        <p className="mt-5 max-w-md mx-auto rounded-xl bg-[var(--kh-sand)]/35 px-4 py-3 text-sm text-[var(--kh-brown-soft)] leading-relaxed">
+          {calendlyWarning}
+        </p>
+      ) : null}
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link href="/" className="kh-btn kh-btn-ghost">Back to home</Link>
         <a className="kh-btn kh-btn-gold" href="https://www.instagram.com/krownedhands/" target="_blank" rel="noreferrer">

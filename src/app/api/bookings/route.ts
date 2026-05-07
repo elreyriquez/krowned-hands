@@ -50,19 +50,27 @@ export async function POST(req: Request) {
   notifyNewBooking(record).catch((err) => console.error("[bookings.POST] notify error", err));
 
   let calendlySynced = false;
+  let calendlyError: { code: string; detail?: string } | undefined;
   try {
     const created = await createInviteeForBooking(result.data);
-    if (created?.inviteeUri) {
+    if (created.ok) {
       await attachCalendlyInviteeToBooking(
         record.id,
         created.inviteeUri,
         created.eventUri,
       );
       calendlySynced = true;
+    } else {
+      calendlyError = { code: created.code, detail: created.detail };
+      console.error("[bookings.POST] Calendly sync failed", created.code, created.detail);
     }
   } catch (err) {
     console.error("[bookings.POST] Calendly Scheduling API error", err);
+    calendlyError = { code: "calendly_unexpected_error" };
   }
 
-  return NextResponse.json({ ok: true, id: record.id, calendlySynced }, { status: 201 });
+  return NextResponse.json(
+    { ok: true, id: record.id, calendlySynced, calendlyError },
+    { status: 201 },
+  );
 }

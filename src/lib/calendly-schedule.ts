@@ -2,8 +2,27 @@ import type { ValidatedBooking } from "./validation";
 
 const API_BASE = "https://api.calendly.com";
 
+export type CalendlyInviteeOutcome =
+  | { ok: true; inviteeUri: string; eventUri?: string; startTimeUsed?: string }
+  | {
+      ok: false;
+      /** Stable machine code for logs/support */
+      code: string;
+      /** Safe human hint (no secrets) */
+      detail?: string;
+      httpStatus?: number;
+    };
+
 function bearer(): string | undefined {
   return process.env.CALENDLY_API_TOKEN?.trim();
+}
+
+/** Full URI `https://api.calendly.com/event_types/{uuid}` — accepts bare UUID too. */
+export function normalizeEventTypeUri(raw: string): string {
+  const t = raw.trim();
+  if (!t) return t;
+  if (/^https?:\/\//i.test(t)) return t;
+  return `https://api.calendly.com/event_types/${t}`;
 }
 
 /** Map site session → Calendly event type URI from GET /event_types. */
@@ -14,8 +33,8 @@ export function resolveCalendlyEventTypeUri(serviceId: string): string | null {
     "krowned-renew-120": process.env.CALENDLY_EVENT_TYPE_URI_KROWNED_RENEW_120,
   };
   const specific = perService[serviceId]?.trim();
-  if (specific) return specific;
-  return process.env.CALENDLY_EVENT_TYPE_URI?.trim() || null;
+  const chosen = specific || process.env.CALENDLY_EVENT_TYPE_URI?.trim();
+  return chosen ? normalizeEventTypeUri(chosen) : null;
 }
 
 /** Jamaica local wall clock → UTC ISO (America/Jamaica is UTC−5 year‑round). */
@@ -35,33 +54,211 @@ function normalizeSmsPhone(raw: string): string | undefined {
   return `+${digits}`;
 }
 
-type CreateInviteeResponse = {
-  resource?: {
-    uri?: string;
-    scheduled_event?: string;
-    event?: string;
-  };
+type AvailableTimesResponse = {
+  collection?: Array<{ start_time?: string; invitees_remaining?: number }>;
 };
+
+type CreateInviteeResponse = Record<string, unknown>;
+
+async function calendlyFetchAuth(
+  pathWithQuery: string,
+  token: string,
+): Promise<{ ok: true; text: string } | { ok: false; status: number; text: string }> {
+  const path = pathWithQuery.startsWith("/") ? pathWithQuery : `/${pathWithQuery}`;
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+  const text = await res.text();
+  if (!res.ok) return { ok: false, status: res.status, text };
+  return { ok: true, text };
+}
+
+async function calendlyPostAuth(
+  path: string,
+  token: string,
+  body: unknown,
+): Promise<{ ok: true; text: string } | { ok: false; status: number; text: string }> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+  const text = await res.text();
+  if (!res.ok) return { ok: false, status: res.status, text };
+  return { ok: true, text };
+}
+
+function parseCalendlyError(text: string): string | undefined {
+  try {
+    const j = JSON.parse(text) as {
+      title?: string;
+      message?: string;
+      details?: Array<{ message?: string }>;
+    };
+    const detailMsg = j.details?.map((d) => d.message).filter(Boolean).join("; ");
+    return [j.title, j.message, detailMsg].filter(Boolean).join(" — ") || undefined;
+  } catch {
+    return text.slice(0, 280) || undefined;
+  }
+}
+
+/** Pick Calendly's canonical slot instant — POST /invitees usually rejects times not in this list. */
+async function resolveStartTimeFromAvailability(args: {
+  token: string;
+  eventTypeUri: string;
+  preferredDate: string;
+  preferredTimeHHMM: string;
+}): Promise<{ startTime: string } | { error: string; httpStatus?: number }> {
+  const dayStart = kingstonLocalToUtcIso(args.preferredDate, "00:00");
+  const dayEnd = kingstonLocalToUtcIso(args.preferredDate, "23:59");
+  const q = [
+    `event_type=${encodeURIComponent(args.eventTypeUri)}`,
+    `start_time=${encodeURIComponent(dayStart)}`,
+    `end_time=${encodeURIComponent(dayEnd)}`,
+  ].join("&");
+
+  const got = await calendlyFetchAuth(`/event_type_available_times?${q}`, args.token);
+  if (!got.ok) {
+    return {
+      error: parseCalendlyError(got.text) || `available_times_http_${got.status}`,
+      httpStatus: got.status,
+    };
+  }
+
+  let parsed: AvailableTimesResponse;
+  try {
+    parsed = JSON.parse(got.text) as AvailableTimesResponse;
+  } catch {
+    return { error: "available_times_invalid_json" };
+  }
+
+  const slots = (parsed.collection ?? [])
+    .filter(
+      (s) =>
+        s.invitees_remaining === undefined ||
+        s.invitees_remaining === null ||
+        s.invitees_remaining > 0,
+    )
+    .map((s) => s.start_time)
+    .filter((s): s is string => Boolean(s));
+
+  if (slots.length === 0) {
+    return { error: "no_open_slots_that_day_in_calendly" };
+  }
+
+  const desiredMs = new Date(
+    kingstonLocalToUtcIso(args.preferredDate, args.preferredTimeHHMM),
+  ).getTime();
+
+  const toleranceMs = 90 * 1000;
+  const exact = slots.find((iso) => Math.abs(new Date(iso).getTime() - desiredMs) <= toleranceMs);
+  if (exact) return { startTime: exact };
+
+  let best = slots[0];
+  let bestDiff = Infinity;
+  for (const iso of slots) {
+    const diff = Math.abs(new Date(iso).getTime() - desiredMs);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = iso;
+    }
+  }
+  return { startTime: best };
+}
+
+function extractInviteeUri(res: CreateInviteeResponse): string | undefined {
+  const resource = res.resource as Record<string, unknown> | undefined;
+  if (!resource) return undefined;
+
+  if (typeof resource.uri === "string" && resource.uri.includes("/invitees/")) {
+    return resource.uri;
+  }
+
+  const invitee = resource.invitee as { uri?: string } | undefined;
+  if (typeof invitee?.uri === "string") return invitee.uri;
+
+  const se = resource.scheduled_event;
+  if (se && typeof se === "object" && se !== null) {
+    const invs = (se as { invitees?: Array<{ uri?: string }> }).invitees;
+    const first = invs?.[0]?.uri;
+    if (typeof first === "string") return first;
+  }
+
+  return undefined;
+}
+
+function extractEventUri(res: CreateInviteeResponse): string | undefined {
+  const resource = res.resource as Record<string, unknown> | undefined;
+  if (!resource) return undefined;
+  const se = resource.scheduled_event;
+  if (typeof se === "string") return se;
+  if (se && typeof se === "object" && se !== null && "uri" in se) {
+    const u = (se as { uri?: string }).uri;
+    if (typeof u === "string") return u;
+  }
+  const evt = resource.event;
+  if (typeof evt === "string") return evt;
+  return undefined;
+}
+
+function extractInviteeUriFromRaw(text: string): string | undefined {
+  const m = text.match(/https:\/\/api\.calendly\.com\/scheduled_events\/[^/]+\/invitees\/[^"]+/);
+  return m?.[0];
+}
 
 /**
  * Creates a Calendly scheduled event via Scheduling API (POST /invitees).
- * Requires a paid Calendly plan + PAT/OAuth scopes for scheduling.
+ * Requires paid Calendly + PAT scopes for scheduling + availability reads.
  *
  * @see https://developer.calendly.com/schedule-events-with-ai-agents
  */
 export async function createInviteeForBooking(
   data: ValidatedBooking,
-): Promise<{ inviteeUri: string; eventUri?: string } | null> {
+): Promise<CalendlyInviteeOutcome> {
   const token = bearer();
   const eventType = resolveCalendlyEventTypeUri(data.serviceId);
-  if (!token || !eventType) {
-    console.warn(
-      "[calendly-schedule] Skipping Calendly create: set CALENDLY_API_TOKEN and CALENDLY_EVENT_TYPE_URI (or per-service URIs).",
-    );
-    return null;
+
+  if (!token) {
+    return {
+      ok: false,
+      code: "skipped_missing_calendly_api_token",
+      detail: "Set CALENDLY_API_TOKEN on the server.",
+    };
+  }
+  if (!eventType) {
+    return {
+      ok: false,
+      code: "skipped_missing_event_type_uri",
+      detail:
+        "Set CALENDLY_EVENT_TYPE_URI or CALENDLY_EVENT_TYPE_URI_KROWNED_* (full URI or UUID).",
+    };
   }
 
-  const startTime = kingstonLocalToUtcIso(data.preferredDate, data.preferredTime);
+  const slot = await resolveStartTimeFromAvailability({
+    token,
+    eventTypeUri: eventType,
+    preferredDate: data.preferredDate,
+    preferredTimeHHMM: data.preferredTime,
+  });
+
+  if ("error" in slot) {
+    return {
+      ok: false,
+      code: "calendly_available_times_failed",
+      detail: slot.error,
+      httpStatus: slot.httpStatus,
+    };
+  }
+
+  const startTime = slot.startTime;
   const locationKind = process.env.CALENDLY_BOOKING_LOCATION_KIND?.trim();
 
   const addrLine = [data.address, data.areaCustom, data.addressNotes, data.message]
@@ -76,14 +273,14 @@ export async function createInviteeForBooking(
   const sms = normalizeSmsPhone(data.phone);
   if (sms) invitee.text_reminder_number = sms;
 
+  // Do not send a partial `tracking` object — some Calendly org integrations
+  // treat every tracking.* field as required and return 400 ("is missing").
   const body: Record<string, unknown> = {
     event_type: eventType,
     start_time: startTime,
     invitee,
-    tracking: { utm_source: "krownedhands.com", utm_medium: "booking_form" },
   };
 
-  // Required for many event types (mobile / ask-invitee location). Omit with CALENDLY_BOOKING_LOCATION_KIND=omit
   if (locationKind && locationKind !== "omit" && locationKind !== "none") {
     body.location = {
       kind: locationKind,
@@ -91,41 +288,39 @@ export async function createInviteeForBooking(
     };
   }
 
-  try {
-    const res = await fetch(`${API_BASE}/invitees`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-    const text = await res.text();
-    if (!res.ok) {
-      console.error("[calendly-schedule] POST /invitees failed", res.status, text);
-      return null;
-    }
-    let json: CreateInviteeResponse;
-    try {
-      json = JSON.parse(text) as CreateInviteeResponse;
-    } catch {
-      console.error("[calendly-schedule] Invalid JSON from /invitees", text);
-      return null;
-    }
-    const inviteeUri = json.resource?.uri;
-    if (!inviteeUri) {
-      console.error("[calendly-schedule] Response missing invitee uri", text);
-      return null;
-    }
-    const eventUri =
-      typeof json.resource?.scheduled_event === "string"
-        ? json.resource.scheduled_event
-        : typeof json.resource?.event === "string"
-          ? json.resource.event
-          : undefined;
-    return { inviteeUri, eventUri };
-  } catch (err) {
-    console.error("[calendly-schedule] Request error", err);
-    return null;
+  const posted = await calendlyPostAuth("/invitees", token, body);
+  if (!posted.ok) {
+    return {
+      ok: false,
+      code: "calendly_invitees_post_failed",
+      detail: parseCalendlyError(posted.text),
+      httpStatus: posted.status,
+    };
   }
+
+  let json: CreateInviteeResponse;
+  try {
+    json = JSON.parse(posted.text) as CreateInviteeResponse;
+  } catch {
+    return {
+      ok: false,
+      code: "calendly_invitees_invalid_json",
+      detail: posted.text.slice(0, 200),
+    };
+  }
+
+  let inviteeUri = extractInviteeUri(json);
+  if (!inviteeUri) inviteeUri = extractInviteeUriFromRaw(posted.text);
+
+  if (!inviteeUri) {
+    return {
+      ok: false,
+      code: "calendly_invitees_missing_uri",
+      detail:
+        "Calendly returned 200 but no invitee URI was found. Check logs for raw response shape.",
+    };
+  }
+
+  const eventUri = extractEventUri(json);
+  return { ok: true, inviteeUri, eventUri, startTimeUsed: startTime };
 }

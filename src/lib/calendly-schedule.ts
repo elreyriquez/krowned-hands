@@ -110,6 +110,92 @@ function parseCalendlyError(text: string): string | undefined {
   }
 }
 
+function eventTypeUuid(eventTypeUri: string): string {
+  return eventTypeUri.replace(/^.*\/event_types\//i, "").replace(/\/$/, "");
+}
+
+/**
+ * Allowed location kinds for this event type (from Calendly).
+ * `[]` = none configured — omit `location` on POST /invitees.
+ * `null` = request failed — caller may fall back to env-only behavior.
+ */
+async function fetchEventTypeLocationKinds(
+  token: string,
+  eventTypeUri: string,
+): Promise<string[] | null> {
+  const uuid = eventTypeUuid(eventTypeUri);
+  if (!uuid) return null;
+  const got = await calendlyFetchAuth(`/event_types/${uuid}`, token);
+  if (!got.ok) return null;
+  try {
+    const j = JSON.parse(got.text) as {
+      resource?: { locations?: Array<{ kind?: string }> | null };
+    };
+    const locs = j.resource?.locations;
+    if (!locs || locs.length === 0) return [];
+    return locs.map((l) => l.kind).filter((k): k is string => Boolean(k));
+  } catch {
+    return null;
+  }
+}
+
+/** Kinds where Calendly expects invitee-supplied details in `location.location`. */
+const LOCATION_KINDS_NEED_INVITEE_ADDRESS = new Set(["ask_invitee", "outbound_call"]);
+
+/**
+ * Builds `body.location` so `kind` always matches the event type's configured options.
+ * Avoids 400 "invalid location choice" when env lists the wrong kind (e.g. physical vs ask_invitee).
+ */
+async function buildInviteeLocationPayload(args: {
+  token: string;
+  eventTypeUri: string;
+  envKindRaw: string | undefined;
+  addressLine: string;
+}): Promise<Record<string, string> | undefined> {
+  const envTrim = args.envKindRaw?.trim();
+  const envLower = envTrim?.toLowerCase();
+  if (envLower === "omit" || envLower === "none") return undefined;
+
+  const allowed = await fetchEventTypeLocationKinds(args.token, args.eventTypeUri);
+
+  // Could not read event type — behave like before: only send location if env set.
+  if (allowed === null) {
+    if (!envTrim) return undefined;
+    const kind = envTrim;
+    const loc: Record<string, string> = { kind };
+    if (LOCATION_KINDS_NEED_INVITEE_ADDRESS.has(kind) && args.addressLine) {
+      loc.location = args.addressLine;
+    }
+    return loc;
+  }
+
+  if (allowed.length === 0) return undefined;
+
+  let chosen: string;
+  if (envTrim && allowed.includes(envTrim)) {
+    chosen = envTrim;
+  } else if (allowed.includes("ask_invitee")) {
+    chosen = "ask_invitee";
+  } else {
+    chosen = allowed[0]!;
+  }
+
+  if (envTrim && !allowed.includes(envTrim)) {
+    console.info(
+      "[calendly-schedule] CALENDLY_BOOKING_LOCATION_KIND=%s not configured on event type; using %s (allowed: %s)",
+      envTrim,
+      chosen,
+      allowed.join(", "),
+    );
+  }
+
+  const loc: Record<string, string> = { kind: chosen };
+  if (LOCATION_KINDS_NEED_INVITEE_ADDRESS.has(chosen) && args.addressLine) {
+    loc.location = args.addressLine;
+  }
+  return loc;
+}
+
 /** Pick Calendly's canonical slot instant — POST /invitees usually rejects times not in this list. */
 async function resolveStartTimeFromAvailability(args: {
   token: string;
@@ -259,7 +345,6 @@ export async function createInviteeForBooking(
   }
 
   const startTime = slot.startTime;
-  const locationKind = process.env.CALENDLY_BOOKING_LOCATION_KIND?.trim();
 
   const addrLine = [data.address, data.areaCustom, data.addressNotes, data.message]
     .filter(Boolean)
@@ -281,12 +366,13 @@ export async function createInviteeForBooking(
     invitee,
   };
 
-  if (locationKind && locationKind !== "omit" && locationKind !== "none") {
-    body.location = {
-      kind: locationKind,
-      location: addrLine || data.address,
-    };
-  }
+  const locationPayload = await buildInviteeLocationPayload({
+    token,
+    eventTypeUri: eventType,
+    envKindRaw: process.env.CALENDLY_BOOKING_LOCATION_KIND,
+    addressLine: addrLine || data.address,
+  });
+  if (locationPayload) body.location = locationPayload;
 
   const posted = await calendlyPostAuth("/invitees", token, body);
   if (!posted.ok) {

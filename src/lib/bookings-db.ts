@@ -52,9 +52,8 @@ async function ensureBookingsTable(pool: Pool): Promise<void> {
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS calendly_event_uri TEXT;
     CREATE INDEX IF NOT EXISTS idx_bookings_created_at ON bookings (created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_bookings_preferred_date ON bookings (preferred_date);
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_calendly_invitee_uri
-      ON bookings (calendly_invitee_uri)
-      WHERE calendly_invitee_uri IS NOT NULL;
+    CREATE INDEX IF NOT EXISTS idx_bookings_calendly_invitee_uri
+      ON bookings (calendly_invitee_uri);
   `);
 }
 
@@ -203,65 +202,114 @@ export async function upsertFromCalendlyInDb(
 ): Promise<BookingRecord> {
   const pool = await getPool();
   const createdAt = new Date().toISOString();
-  const res = await pool.query<PgRow>(
-    `INSERT INTO bookings (
-      id, created_at, status,
-      service_id, service_name, duration_minutes,
-      price_usd, price_jmd, quote_currency,
-      area, area_custom, address, address_notes,
-      preferred_date, preferred_time, preferred_window,
-      client_name, email, phone, message, consent,
-      source, calendly_invitee_uri, calendly_event_uri
-    ) VALUES (
-      $1, $2::timestamptz, $3,
-      $4, $5, $6,
-      $7, $8, $9,
-      $10, $11, $12, $13,
-      $14::date, $15, $16,
-      $17, $18, $19, $20, $21,
-      $22, $23, $24
-    )
-    ON CONFLICT (calendly_invitee_uri) DO UPDATE SET
-      status = EXCLUDED.status,
-      service_name = EXCLUDED.service_name,
-      duration_minutes = EXCLUDED.duration_minutes,
-      preferred_date = EXCLUDED.preferred_date,
-      preferred_time = EXCLUDED.preferred_time,
-      preferred_window = EXCLUDED.preferred_window,
-      client_name = EXCLUDED.client_name,
-      email = EXCLUDED.email,
-      phone = EXCLUDED.phone,
-      message = EXCLUDED.message,
-      calendly_event_uri = EXCLUDED.calendly_event_uri
-    RETURNING *`,
-    [
-      crypto.randomUUID(),
-      createdAt,
-      input.status,
-      "calendly",
-      input.serviceName || "Calendly session",
-      input.durationMinutes || 60,
-      0,
-      null,
-      null,
-      input.area || "other",
-      input.areaCustom || "Calendly",
-      input.address || "Captured in Calendly",
-      input.addressNotes || null,
-      input.preferredDate,
-      input.preferredTime || null,
-      input.preferredWindow || null,
-      input.name || "Calendly guest",
-      input.email || "",
-      input.phone || "-",
-      input.message || null,
-      true,
-      "calendly",
-      input.calendlyInviteeUri,
-      input.calendlyEventUri || null,
-    ],
-  );
-  const row = res.rows[0];
-  if (!row) throw new Error("[bookings-db] Calendly upsert returned no row");
-  return rowToRecord(row);
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const existing = await client.query<{ id: string }>(
+      `SELECT id FROM bookings
+       WHERE calendly_invitee_uri = $1
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [input.calendlyInviteeUri],
+    );
+
+    let row: PgRow | undefined;
+    if (existing.rows[0]?.id) {
+      const updated = await client.query<PgRow>(
+        `UPDATE bookings
+         SET status = $2,
+             service_name = $3,
+             duration_minutes = $4,
+             preferred_date = $5::date,
+             preferred_time = $6,
+             preferred_window = $7,
+             client_name = $8,
+             email = $9,
+             phone = $10,
+             message = $11,
+             calendly_event_uri = $12,
+             area = $13,
+             area_custom = $14,
+             address = $15,
+             address_notes = $16
+         WHERE id = $1
+         RETURNING *`,
+        [
+          existing.rows[0].id,
+          input.status,
+          input.serviceName || "Calendly session",
+          input.durationMinutes || 60,
+          input.preferredDate,
+          input.preferredTime || null,
+          input.preferredWindow || null,
+          input.name || "Calendly guest",
+          input.email || "",
+          input.phone || "-",
+          input.message || null,
+          input.calendlyEventUri || null,
+          input.area || "other",
+          input.areaCustom || "Calendly",
+          input.address || "Captured in Calendly",
+          input.addressNotes || null,
+        ],
+      );
+      row = updated.rows[0];
+    } else {
+      const inserted = await client.query<PgRow>(
+        `INSERT INTO bookings (
+          id, created_at, status,
+          service_id, service_name, duration_minutes,
+          price_usd, price_jmd, quote_currency,
+          area, area_custom, address, address_notes,
+          preferred_date, preferred_time, preferred_window,
+          client_name, email, phone, message, consent,
+          source, calendly_invitee_uri, calendly_event_uri
+        ) VALUES (
+          $1, $2::timestamptz, $3,
+          $4, $5, $6,
+          $7, $8, $9,
+          $10, $11, $12, $13,
+          $14::date, $15, $16,
+          $17, $18, $19, $20, $21,
+          $22, $23, $24
+        )
+        RETURNING *`,
+        [
+          crypto.randomUUID(),
+          createdAt,
+          input.status,
+          "calendly",
+          input.serviceName || "Calendly session",
+          input.durationMinutes || 60,
+          0,
+          null,
+          null,
+          input.area || "other",
+          input.areaCustom || "Calendly",
+          input.address || "Captured in Calendly",
+          input.addressNotes || null,
+          input.preferredDate,
+          input.preferredTime || null,
+          input.preferredWindow || null,
+          input.name || "Calendly guest",
+          input.email || "",
+          input.phone || "-",
+          input.message || null,
+          true,
+          "calendly",
+          input.calendlyInviteeUri,
+          input.calendlyEventUri || null,
+        ],
+      );
+      row = inserted.rows[0];
+    }
+    await client.query("COMMIT");
+    if (!row) throw new Error("[bookings-db] Calendly upsert returned no row");
+    return rowToRecord(row);
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }

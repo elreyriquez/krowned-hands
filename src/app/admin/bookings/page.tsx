@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { AdminConfirmActionForm } from "@/components/AdminConfirmActionForm";
 import { isAdminRequest, signOut } from "@/lib/auth";
 import { deleteBooking, readAll, setBookingStatus } from "@/lib/bookings";
 import { syncCalendlyRecentBookings } from "@/lib/calendly";
@@ -149,19 +150,19 @@ export default async function AdminBookingsPage() {
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex flex-wrap gap-2">
                       {b.status !== "cancelled" ? (
-                        <form action={handleCancelBooking}>
-                          <input type="hidden" name="id" value={b.id} />
-                          <button className="kh-btn kh-btn-ghost !py-1.5 !px-3 !min-h-0 text-xs">
-                            Cancel
-                          </button>
-                        </form>
+                        <AdminConfirmActionForm
+                          action={handleCancelBooking}
+                          id={b.id}
+                          buttonText="Cancel"
+                          confirmMessage={`Mark reservation for ${b.name} (${b.serviceName}) as cancelled? You can remove it later.`}
+                        />
                       ) : null}
-                      <form action={handleDeleteBooking}>
-                        <input type="hidden" name="id" value={b.id} />
-                        <button className="kh-btn kh-btn-ghost !py-1.5 !px-3 !min-h-0 text-xs">
-                          Remove
-                        </button>
-                      </form>
+                      <AdminConfirmActionForm
+                        action={handleDeleteBooking}
+                        id={b.id}
+                        buttonText="Remove"
+                        confirmMessage={`Permanently delete this reservation for ${b.name}? This cannot be undone.`}
+                      />
                     </div>
                   </td>
                 </tr>

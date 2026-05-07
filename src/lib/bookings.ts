@@ -1,7 +1,11 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import { appendToDb, readAllFromDb } from "./bookings-db";
+import {
+  appendToDb,
+  readAllFromDb,
+  upsertFromCalendlyInDb,
+} from "./bookings-db";
 
 /**
  * Booking persistence.
@@ -42,6 +46,10 @@ export type BookingRecord = {
   phone: string;
   message?: string;
   consent: boolean;
+  /** External source marker (e.g. Calendly). */
+  source?: "manual" | "calendly";
+  calendlyInviteeUri?: string;
+  calendlyEventUri?: string;
 };
 
 function persistWithPostgres(): boolean {
@@ -75,6 +83,9 @@ const LEDGER_HEADERS = [
   "phone",
   "message",
   "consent",
+  "source",
+  "calendly_invitee_uri",
+  "calendly_event_uri",
 ] as const;
 
 function csvCell(value: string | number | boolean | undefined | null): string {
@@ -107,6 +118,9 @@ function rowFromRecord(r: BookingRecord): string {
     csvCell(r.phone),
     csvCell(r.message ?? ""),
     csvCell(r.consent ? "yes" : "no"),
+    csvCell(r.source ?? ""),
+    csvCell(r.calendlyInviteeUri ?? ""),
+    csvCell(r.calendlyEventUri ?? ""),
   ].join(",");
 }
 
@@ -173,4 +187,73 @@ export async function append(
     console.error("[bookings] ledger CSV write failed", err);
   }
   return record;
+}
+
+export type CalendlySyncInput = {
+  calendlyInviteeUri: string;
+  calendlyEventUri?: string;
+  status: BookingStatus;
+  serviceName: string;
+  durationMinutes: number;
+  preferredDate: string;
+  preferredTime?: string;
+  preferredWindow?: string;
+  name: string;
+  email: string;
+  phone?: string;
+  area?: string;
+  areaCustom?: string;
+  address?: string;
+  addressNotes?: string;
+  message?: string;
+};
+
+export async function upsertFromCalendly(input: CalendlySyncInput): Promise<BookingRecord> {
+  if (persistWithPostgres()) {
+    return upsertFromCalendlyInDb(input);
+  }
+  await ensureStore();
+  const all = await readAll();
+  const existingIdx = all.findIndex(
+    (b) => b.calendlyInviteeUri && b.calendlyInviteeUri === input.calendlyInviteeUri,
+  );
+
+  const base: BookingRecord = {
+    id: existingIdx >= 0 ? all[existingIdx].id : crypto.randomUUID(),
+    createdAt: existingIdx >= 0 ? all[existingIdx].createdAt : new Date().toISOString(),
+    status: input.status,
+    serviceId: "calendly",
+    serviceName: input.serviceName || "Calendly session",
+    durationMinutes: input.durationMinutes || 60,
+    priceUsd: existingIdx >= 0 ? all[existingIdx].priceUsd : 0,
+    area: input.area || (existingIdx >= 0 ? all[existingIdx].area : "other"),
+    areaCustom: input.areaCustom || (existingIdx >= 0 ? all[existingIdx].areaCustom : "Calendly"),
+    address: input.address || (existingIdx >= 0 ? all[existingIdx].address : "Captured in Calendly"),
+    addressNotes: input.addressNotes || (existingIdx >= 0 ? all[existingIdx].addressNotes : undefined),
+    preferredDate: input.preferredDate,
+    preferredTime: input.preferredTime,
+    preferredWindow: input.preferredWindow,
+    name: input.name || (existingIdx >= 0 ? all[existingIdx].name : "Calendly guest"),
+    email: input.email || (existingIdx >= 0 ? all[existingIdx].email : ""),
+    phone: input.phone || (existingIdx >= 0 ? all[existingIdx].phone : "-"),
+    message: input.message || (existingIdx >= 0 ? all[existingIdx].message : undefined),
+    consent: true,
+    source: "calendly",
+    calendlyInviteeUri: input.calendlyInviteeUri,
+    calendlyEventUri: input.calendlyEventUri,
+  };
+
+  if (existingIdx >= 0) {
+    all[existingIdx] = base;
+  } else {
+    all.unshift(base);
+  }
+
+  await fs.writeFile(DATA_FILE, JSON.stringify(all, null, 2), "utf8");
+  try {
+    await writeLedgerCsv(all);
+  } catch (err) {
+    console.error("[bookings] ledger CSV write failed", err);
+  }
+  return base;
 }

@@ -69,8 +69,9 @@ npm start
 | Route              | Purpose                                                                |
 | ------------------ | ---------------------------------------------------------------------- |
 | `/`                | Marketing home: hero, three pillars, services, about, how it works, testimonial strip, FAQ, CTA. |
-| `/book`            | Multi-step reservation form (Session → When & Where → Your details → Review) with summary + success state. |
+| `/book`            | Calendly embed when `NEXT_PUBLIC_CALENDLY_BOOKING_URL` is set; otherwise the in-app multi-step reservation form. |
 | `/api/bookings`    | `POST` endpoint the form submits to. Validates, persists, notifies.   |
+| `/api/webhooks/calendly` | Receives Calendly events and syncs them into the booking store (for admin calendar/insights). |
 | `/admin/login`     | Minimal password sign-in (uses `ADMIN_PASSWORD`).                      |
 | `/admin/bookings`  | Reservations table (cookie-protected).                                 |
 
@@ -126,6 +127,19 @@ written to the server log.
 | `BOOKINGS_WEBHOOK_URL`  | Generic `POST` webhook (Zapier, Make, n8n, Slack). Receives the full JSON record. |
 
 The notifier fails open — a notification failure never breaks the reservation.
+
+---
+
+## Calendly mode (optional)
+
+Set `NEXT_PUBLIC_CALENDLY_BOOKING_URL` to use Calendly directly on `/book`.
+
+- Calendly becomes the booking source of truth.
+- The in-app form remains as automatic fallback when the URL is not set.
+- If you stay in Calendly mode, enable webhook sync so admin pages stay updated:
+  - Webhook URL: `https://your-domain.com/api/webhooks/calendly`
+  - Events to subscribe: `invitee.created`, `invitee.canceled`
+  - Set `CALENDLY_WEBHOOK_SIGNING_KEY` in env for signature verification.
 
 ---
 

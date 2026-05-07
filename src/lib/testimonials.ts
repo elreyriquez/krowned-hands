@@ -15,31 +15,31 @@ export const FEATURED_ROTATING_ANONYMOUS: Testimonial[] = [
   {
     quote:
       "I booked an hour. I walked away with a week of sleep. Jordan brought calm into my house, and it stayed after he left.",
-    attribution: "Guest feedback",
+    attribution: "Client feedback",
   },
   {
     quote: "My back feels so much better! Thanks.",
-    attribution: "Guest feedback",
+    attribution: "Client feedback",
   },
   {
     quote:
       "For the first time in two years, I rode my bike along the coast without shoulder pain. Absolutely incredible. I'm so grateful.",
-    attribution: "Guest feedback",
+    attribution: "Client feedback",
   },
   {
     quote:
       "Feeling phenomenal! The sharp neck pain eased and my shoulders feel much less stiff.",
-    attribution: "Guest feedback",
+    attribution: "Client feedback",
   },
   {
     quote:
       "I haven't felt pain relief like this in a while. You listened, took your time, and cleared the knots. One of the best sessions I've ever had.",
-    attribution: "Guest feedback",
+    attribution: "Client feedback",
   },
   {
     quote:
       "I had this feeling of calm that was really wonderful. It should be my weekly ritual.",
-    attribution: "Guest feedback",
+    attribution: "Client feedback",
   },
 ];
 

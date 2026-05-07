@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import crypto from "node:crypto";
-import type { BookingRecord, BookingStatus } from "./bookings";
+import type { BookingRecord, BookingStatus, CalendlySyncInput } from "./bookings";
 
 let poolInit: Promise<Pool> | null = null;
 
@@ -42,10 +42,19 @@ async function ensureBookingsTable(pool: Pool): Promise<void> {
       email TEXT NOT NULL,
       phone TEXT NOT NULL,
       message TEXT,
-      consent BOOLEAN NOT NULL
+      consent BOOLEAN NOT NULL,
+      source TEXT,
+      calendly_invitee_uri TEXT,
+      calendly_event_uri TEXT
     );
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS source TEXT;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS calendly_invitee_uri TEXT;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS calendly_event_uri TEXT;
     CREATE INDEX IF NOT EXISTS idx_bookings_created_at ON bookings (created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_bookings_preferred_date ON bookings (preferred_date);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_calendly_invitee_uri
+      ON bookings (calendly_invitee_uri)
+      WHERE calendly_invitee_uri IS NOT NULL;
   `);
 }
 
@@ -71,6 +80,9 @@ type PgRow = {
   phone: string;
   message: string | null;
   consent: boolean;
+  source: string | null;
+  calendly_invitee_uri: string | null;
+  calendly_event_uri: string | null;
 };
 
 function formatPreferredDate(v: Date | string): string {
@@ -111,6 +123,9 @@ function rowToRecord(row: PgRow): BookingRecord {
   if (row.preferred_time) rec.preferredTime = row.preferred_time;
   if (row.preferred_window) rec.preferredWindow = row.preferred_window;
   if (row.message) rec.message = row.message;
+  if (row.source === "manual" || row.source === "calendly") rec.source = row.source;
+  if (row.calendly_invitee_uri) rec.calendlyInviteeUri = row.calendly_invitee_uri;
+  if (row.calendly_event_uri) rec.calendlyEventUri = row.calendly_event_uri;
 
   return rec;
 }
@@ -138,14 +153,16 @@ export async function appendToDb(
       price_usd, price_jmd, quote_currency,
       area, area_custom, address, address_notes,
       preferred_date, preferred_time, preferred_window,
-      client_name, email, phone, message, consent
+      client_name, email, phone, message, consent,
+      source, calendly_invitee_uri, calendly_event_uri
     ) VALUES (
       $1, $2::timestamptz, $3,
       $4, $5, $6,
       $7, $8, $9,
       $10, $11, $12, $13,
       $14::date, $15, $16,
-      $17, $18, $19, $20, $21
+      $17, $18, $19, $20, $21,
+      $22, $23, $24
     )
     RETURNING *`,
     [
@@ -170,10 +187,81 @@ export async function appendToDb(
       data.phone,
       data.message ?? null,
       data.consent,
+      data.source ?? "manual",
+      data.calendlyInviteeUri ?? null,
+      data.calendlyEventUri ?? null,
     ],
   );
 
   const row = res.rows[0];
   if (!row) throw new Error("[bookings-db] INSERT returned no row");
+  return rowToRecord(row);
+}
+
+export async function upsertFromCalendlyInDb(
+  input: CalendlySyncInput,
+): Promise<BookingRecord> {
+  const pool = await getPool();
+  const createdAt = new Date().toISOString();
+  const res = await pool.query<PgRow>(
+    `INSERT INTO bookings (
+      id, created_at, status,
+      service_id, service_name, duration_minutes,
+      price_usd, price_jmd, quote_currency,
+      area, area_custom, address, address_notes,
+      preferred_date, preferred_time, preferred_window,
+      client_name, email, phone, message, consent,
+      source, calendly_invitee_uri, calendly_event_uri
+    ) VALUES (
+      $1, $2::timestamptz, $3,
+      $4, $5, $6,
+      $7, $8, $9,
+      $10, $11, $12, $13,
+      $14::date, $15, $16,
+      $17, $18, $19, $20, $21,
+      $22, $23, $24
+    )
+    ON CONFLICT (calendly_invitee_uri) DO UPDATE SET
+      status = EXCLUDED.status,
+      service_name = EXCLUDED.service_name,
+      duration_minutes = EXCLUDED.duration_minutes,
+      preferred_date = EXCLUDED.preferred_date,
+      preferred_time = EXCLUDED.preferred_time,
+      preferred_window = EXCLUDED.preferred_window,
+      client_name = EXCLUDED.client_name,
+      email = EXCLUDED.email,
+      phone = EXCLUDED.phone,
+      message = EXCLUDED.message,
+      calendly_event_uri = EXCLUDED.calendly_event_uri
+    RETURNING *`,
+    [
+      crypto.randomUUID(),
+      createdAt,
+      input.status,
+      "calendly",
+      input.serviceName || "Calendly session",
+      input.durationMinutes || 60,
+      0,
+      null,
+      null,
+      input.area || "other",
+      input.areaCustom || "Calendly",
+      input.address || "Captured in Calendly",
+      input.addressNotes || null,
+      input.preferredDate,
+      input.preferredTime || null,
+      input.preferredWindow || null,
+      input.name || "Calendly guest",
+      input.email || "",
+      input.phone || "-",
+      input.message || null,
+      true,
+      "calendly",
+      input.calendlyInviteeUri,
+      input.calendlyEventUri || null,
+    ],
+  );
+  const row = res.rows[0];
+  if (!row) throw new Error("[bookings-db] Calendly upsert returned no row");
   return rowToRecord(row);
 }

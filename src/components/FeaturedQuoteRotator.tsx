@@ -50,7 +50,7 @@ export function FeaturedQuoteRotator({ quotes, intervalSec = 8 }: Props) {
     <div
       className="isolate min-h-[18rem] w-full pt-12 sm:pt-14 md:min-h-[24rem] md:pt-[4.75rem]"
       role="region"
-      aria-label="Rotating guest quotes"
+      aria-label="Rotating client quotes"
     >
       <blockquote
         className={`font-serif text-2xl md:text-4xl leading-snug transition-opacity duration-[380ms] ease-out ${

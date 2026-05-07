@@ -61,6 +61,9 @@ function last12Months(): { year: number; month: number; key: string; label: stri
   return result;
 }
 
+/** Pixel bars avoid `%` height inside nested flex columns (often resolves to 0). */
+const BAR_TRACK_MAX_PX = 112;
+
 function BarChart({
   data,
   color = "var(--kh-gold)",
@@ -75,32 +78,36 @@ function BarChart({
 
   return (
     <div className="relative">
-      <div className="flex items-end gap-[3px] h-36">
+      <div className="flex items-end gap-[3px] h-36 min-h-[9rem]">
         {data.map((d, i) => {
-          const pct = max > 0 ? (d.value / max) * 100 : 0;
+          const frac = max > 0 ? d.value / max : 0;
+          const barPx =
+            d.value > 0
+              ? Math.max(8, Math.round(frac * BAR_TRACK_MAX_PX))
+              : 6;
           const isHover = hover === i;
           return (
             <div
               key={d.label}
-              className="flex-1 flex flex-col items-center gap-0.5 cursor-default group"
+              className="flex h-full min-h-0 flex-1 flex-col items-center justify-end gap-0.5 cursor-default group"
               onMouseEnter={() => setHover(i)}
               onMouseLeave={() => setHover(null)}
             >
               {isHover && d.value > 0 ? (
-                <span className="text-[10px] font-semibold text-[var(--kh-brown)] whitespace-nowrap">
+                <span className="text-[10px] font-semibold text-[var(--kh-brown)] whitespace-nowrap shrink-0">
                   {formatValue(d.value)}
                 </span>
               ) : (
-                <span className="text-[10px] text-transparent select-none">0</span>
+                <span className="text-[10px] text-transparent select-none shrink-0">0</span>
               )}
               <div
-                className="w-full rounded-t transition-all"
+                className="w-full rounded-t transition-all shrink-0"
                 style={{
-                  height: `${Math.max(pct, d.value > 0 ? 4 : 0)}%`,
+                  height: `${barPx}px`,
                   background: isHover
                     ? "var(--kh-brown)"
                     : color,
-                  opacity: d.value === 0 ? 0.2 : 1,
+                  opacity: d.value === 0 ? 0.25 : 1,
                 }}
               />
             </div>

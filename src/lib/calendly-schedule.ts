@@ -1,5 +1,19 @@
 import type { ValidatedBooking } from "./validation";
 
+type CalendlyCustomQuestion = {
+  name?: string;
+  position?: number;
+  required?: boolean;
+  enabled?: boolean;
+  type?: string;
+  answer_choices?: string[];
+};
+
+type EventTypeResource = {
+  locations?: Array<{ kind?: string }> | null;
+  custom_questions?: CalendlyCustomQuestion[] | null;
+};
+
 const API_BASE = "https://api.calendly.com";
 
 export type CalendlyInviteeOutcome =
@@ -114,29 +128,28 @@ function eventTypeUuid(eventTypeUri: string): string {
   return eventTypeUri.replace(/^.*\/event_types\//i, "").replace(/\/$/, "");
 }
 
-/**
- * Allowed location kinds for this event type (from Calendly).
- * `[]` = none configured — omit `location` on POST /invitees.
- * `null` = request failed — caller may fall back to env-only behavior.
- */
-async function fetchEventTypeLocationKinds(
+/** Full event type resource (locations + custom questions). `null` = GET failed. */
+async function fetchEventTypeResource(
   token: string,
   eventTypeUri: string,
-): Promise<string[] | null> {
+): Promise<EventTypeResource | null> {
   const uuid = eventTypeUuid(eventTypeUri);
   if (!uuid) return null;
   const got = await calendlyFetchAuth(`/event_types/${uuid}`, token);
   if (!got.ok) return null;
   try {
-    const j = JSON.parse(got.text) as {
-      resource?: { locations?: Array<{ kind?: string }> | null };
-    };
-    const locs = j.resource?.locations;
-    if (!locs || locs.length === 0) return [];
-    return locs.map((l) => l.kind).filter((k): k is string => Boolean(k));
+    const j = JSON.parse(got.text) as { resource?: EventTypeResource };
+    return j.resource ?? null;
   } catch {
     return null;
   }
+}
+
+function locationKindsFromResource(resource: EventTypeResource | null): string[] | null {
+  if (!resource) return null;
+  const locs = resource.locations;
+  if (!locs || locs.length === 0) return [];
+  return locs.map((l) => l.kind).filter((k): k is string => Boolean(k));
 }
 
 /** Kinds where Calendly expects invitee-supplied details in `location.location`. */
@@ -146,17 +159,16 @@ const LOCATION_KINDS_NEED_INVITEE_ADDRESS = new Set(["ask_invitee", "outbound_ca
  * Builds `body.location` so `kind` always matches the event type's configured options.
  * Avoids 400 "invalid location choice" when env lists the wrong kind (e.g. physical vs ask_invitee).
  */
-async function buildInviteeLocationPayload(args: {
-  token: string;
-  eventTypeUri: string;
+function buildInviteeLocationPayload(args: {
+  resource: EventTypeResource | null;
   envKindRaw: string | undefined;
   addressLine: string;
-}): Promise<Record<string, string> | undefined> {
+}): Record<string, string> | undefined {
   const envTrim = args.envKindRaw?.trim();
   const envLower = envTrim?.toLowerCase();
   if (envLower === "omit" || envLower === "none") return undefined;
 
-  const allowed = await fetchEventTypeLocationKinds(args.token, args.eventTypeUri);
+  const allowed = locationKindsFromResource(args.resource);
 
   // Could not read event type — behave like before: only send location if env set.
   if (allowed === null) {
@@ -194,6 +206,90 @@ async function buildInviteeLocationPayload(args: {
     loc.location = args.addressLine;
   }
   return loc;
+}
+
+const BOOKING_FALLBACK_LINE =
+  "Submitted via krownedhands.com booking — therapist will confirm details at the session.";
+
+/**
+ * Calendly rejects POST /invitees when required custom questions have no answer.
+ * Map site fields + heuristics onto each required question from GET /event_types.
+ */
+function buildQuestionsAndAnswers(
+  resource: EventTypeResource | null,
+  data: ValidatedBooking,
+): Array<{ question: string; answer: string; position: number }> {
+  const questions = resource?.custom_questions;
+  if (!questions?.length) return [];
+
+  const sorted = [...questions]
+    .filter((q) => q.enabled !== false)
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+
+  const out: Array<{ question: string; answer: string; position: number }> = [];
+
+  for (const q of sorted) {
+    if (!q.required) continue;
+
+    const label = (q.name || "").trim();
+    const nameLower = label.toLowerCase();
+    const typeLower = (q.type || "").toLowerCase();
+    let answer = "";
+
+    if (typeLower === "phone_number" || nameLower.includes("phone") || nameLower.includes("contact number")) {
+      answer = data.phone.trim();
+    } else if (
+      nameLower.includes("health") ||
+      nameLower.includes("sickness") ||
+      nameLower.includes("contraindicate") ||
+      nameLower.includes("ailments") ||
+      nameLower.includes("conditions that may")
+    ) {
+      answer =
+        data.message?.trim() ||
+        "No acute conditions disclosed on the web form — please confirm at the appointment if anything changes.";
+    } else if (nameLower.includes("goal") || nameLower.includes("outcomes") || nameLower.includes("hope to achieve")) {
+      answer =
+        data.message?.trim() ||
+        "General wellness / relaxation — happy to discuss priorities at the session.";
+    } else if (nameLower.includes("allerg") || nameLower.includes("lotion") || nameLower.includes("oil")) {
+      answer = "None reported on the booking form.";
+    } else if (
+      nameLower.includes("anything else") ||
+      nameLower.includes("consider before") ||
+      nameLower.includes("prepare for our meeting")
+    ) {
+      answer = [data.addressNotes, data.message].filter(Boolean).join(" — ").trim() || BOOKING_FALLBACK_LINE;
+    } else if (typeLower === "single_select" && q.answer_choices?.length) {
+      const choices = q.answer_choices;
+      const dm = data.durationMinutes;
+      const match =
+        choices.find((c) => dm === 60 && /\b60\b/.test(c)) ||
+        choices.find((c) => dm === 90 && /\b90\b/.test(c)) ||
+        choices.find((c) => dm === 120 && /\b120\b/.test(c)) ||
+        choices.find((c) => c.toLowerCase().includes("reset") && dm === 60) ||
+        choices.find((c) => c.toLowerCase().includes("restore") && dm === 90) ||
+        choices.find((c) => c.toLowerCase().includes("renew") && dm === 120) ||
+        choices[0];
+      answer = match ?? "";
+    } else {
+      answer =
+        data.message?.trim() ||
+        `${BOOKING_FALLBACK_LINE} (${data.serviceName}, ${data.preferredWindow}).`;
+    }
+
+    if (!answer.trim()) {
+      answer = BOOKING_FALLBACK_LINE;
+    }
+
+    out.push({
+      question: label || `Question ${q.position ?? 0}`,
+      answer: answer.trim(),
+      position: q.position ?? 0,
+    });
+  }
+
+  return out;
 }
 
 /** Pick Calendly's canonical slot instant — POST /invitees usually rejects times not in this list. */
@@ -366,13 +462,17 @@ export async function createInviteeForBooking(
     invitee,
   };
 
-  const locationPayload = await buildInviteeLocationPayload({
-    token,
-    eventTypeUri: eventType,
+  const eventTypeResource = await fetchEventTypeResource(token, eventType);
+
+  const locationPayload = buildInviteeLocationPayload({
+    resource: eventTypeResource,
     envKindRaw: process.env.CALENDLY_BOOKING_LOCATION_KIND,
     addressLine: addrLine || data.address,
   });
   if (locationPayload) body.location = locationPayload;
+
+  const qna = buildQuestionsAndAnswers(eventTypeResource, data);
+  if (qna.length > 0) body.questions_and_answers = qna;
 
   const posted = await calendlyPostAuth("/invitees", token, body);
   if (!posted.ok) {

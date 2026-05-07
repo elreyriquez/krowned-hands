@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { isAdminRequest, signOut } from "@/lib/auth";
-import { readAll } from "@/lib/bookings";
+import { deleteBooking, readAll, setBookingStatus } from "@/lib/bookings";
 import { syncCalendlyRecentBookings } from "@/lib/calendly";
 import { formatServiceAreaLabel } from "@/lib/services";
 
@@ -26,6 +26,22 @@ export default async function AdminBookingsPage() {
       // Never crash admin UI on a manual sync attempt.
       console.error("[admin.bookings] calendly sync failed", err);
     }
+    redirect("/admin/bookings");
+  }
+
+  async function handleCancelBooking(formData: FormData) {
+    "use server";
+    const id = String(formData.get("id") || "");
+    if (!id) return;
+    await setBookingStatus(id, "cancelled");
+    redirect("/admin/bookings");
+  }
+
+  async function handleDeleteBooking(formData: FormData) {
+    "use server";
+    const id = String(formData.get("id") || "");
+    if (!id) return;
+    await deleteBooking(id);
     redirect("/admin/bookings");
   }
 
@@ -74,6 +90,7 @@ export default async function AdminBookingsPage() {
                 <th className="px-4 py-3 font-serif">Preferred</th>
                 <th className="px-4 py-3 font-serif">Area</th>
                 <th className="px-4 py-3 font-serif">Contact</th>
+                <th className="px-4 py-3 font-serif">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -128,6 +145,24 @@ export default async function AdminBookingsPage() {
                   <td className="px-4 py-3 whitespace-nowrap">
                     <a className="kh-link block" href={`mailto:${b.email}`}>{b.email}</a>
                     <a className="kh-link block" href={`tel:${b.phone}`}>{b.phone}</a>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="flex flex-wrap gap-2">
+                      {b.status !== "cancelled" ? (
+                        <form action={handleCancelBooking}>
+                          <input type="hidden" name="id" value={b.id} />
+                          <button className="kh-btn kh-btn-ghost !py-1.5 !px-3 !min-h-0 text-xs">
+                            Cancel
+                          </button>
+                        </form>
+                      ) : null}
+                      <form action={handleDeleteBooking}>
+                        <input type="hidden" name="id" value={b.id} />
+                        <button className="kh-btn kh-btn-ghost !py-1.5 !px-3 !min-h-0 text-xs">
+                          Remove
+                        </button>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -313,3 +313,16 @@ export async function upsertFromCalendlyInDb(
     client.release();
   }
 }
+
+export async function updateStatusInDb(
+  id: string,
+  status: BookingStatus,
+): Promise<void> {
+  const pool = await getPool();
+  await pool.query(`UPDATE bookings SET status = $2 WHERE id = $1`, [id, status]);
+}
+
+export async function deleteByIdInDb(id: string): Promise<void> {
+  const pool = await getPool();
+  await pool.query(`DELETE FROM bookings WHERE id = $1`, [id]);
+}

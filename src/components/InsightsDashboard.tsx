@@ -9,6 +9,41 @@ const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct"
 
 function isoYear(iso: string) { return Number(iso.slice(0, 4)); }
 function isoMonth(iso: string) { return Number(iso.slice(5, 7)) - 1; } // 0-based
+function safeIsoDate(value: string | undefined): string | null {
+  if (!value) return null;
+  // Accept both YYYY-MM-DD and full ISO timestamps.
+  const sliced = value.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(sliced) ? sliced : null;
+}
+function bookingMonthKey(b: BookingRecord): string | null {
+  const primary = safeIsoDate(b.preferredDate);
+  const fallback = safeIsoDate(b.createdAt);
+  const iso = primary || fallback;
+  if (!iso) return null;
+  return `${isoYear(iso)}-${String(isoMonth(iso) + 1).padStart(2, "0")}`;
+}
+function serviceRevenueUsd(name: string): number {
+  const n = name.toLowerCase();
+  if (n.includes("reset")) return 100;
+  if (n.includes("restore")) return 130;
+  if (n.includes("renew")) return 160;
+  return 0;
+}
+function serviceRevenueJmd(name: string): number {
+  const n = name.toLowerCase();
+  if (n.includes("reset")) return 15000;
+  if (n.includes("restore")) return 20000;
+  if (n.includes("renew")) return 25000;
+  return 0;
+}
+function bookingRevenue(b: BookingRecord, currency: "usd" | "jmd"): number {
+  if (currency === "usd") {
+    if (b.priceUsd > 0) return b.priceUsd;
+    return serviceRevenueUsd(b.serviceName);
+  }
+  if (typeof b.priceJmd === "number" && b.priceJmd > 0) return b.priceJmd;
+  return serviceRevenueJmd(b.serviceName);
+}
 
 /* ---- helpers ---- */
 function last12Months(): { year: number; month: number; key: string; label: string }[] {
@@ -103,11 +138,7 @@ export function InsightsDashboard({ bookings }: Props) {
   const bookingsPerMonth = useMemo(() =>
     months.map((m) => ({
       label: m.label,
-      value: active.filter(
-        (b) => b.preferredDate &&
-          isoYear(b.preferredDate) === m.year &&
-          isoMonth(b.preferredDate) === m.month
-      ).length,
+      value: active.filter((b) => bookingMonthKey(b) === m.key).length,
     })),
     [active, months]
   );
@@ -117,12 +148,8 @@ export function InsightsDashboard({ bookings }: Props) {
     months.map((m) => ({
       label: m.label,
       value: active
-        .filter(
-          (b) => b.preferredDate &&
-            isoYear(b.preferredDate) === m.year &&
-            isoMonth(b.preferredDate) === m.month
-        )
-        .reduce((sum, b) => sum + (currency === "usd" ? b.priceUsd : (b.priceJmd ?? 0)), 0),
+        .filter((b) => bookingMonthKey(b) === m.key)
+        .reduce((sum, b) => sum + bookingRevenue(b, currency), 0),
     })),
     [active, months, currency]
   );
@@ -133,7 +160,7 @@ export function InsightsDashboard({ bookings }: Props) {
     active.forEach((b) => {
       const e = map.get(b.serviceName) ?? { count: 0, revenue: 0 };
       e.count++;
-      e.revenue += currency === "usd" ? b.priceUsd : (b.priceJmd ?? 0);
+      e.revenue += bookingRevenue(b, currency);
       map.set(b.serviceName, e);
     });
     return [...map.entries()]
@@ -180,7 +207,7 @@ export function InsightsDashboard({ bookings }: Props) {
   }, [bookings]);
 
   /* ---- Totals ---- */
-  const totalRevenue = active.reduce((s, b) => s + (currency === "usd" ? b.priceUsd : (b.priceJmd ?? 0)), 0);
+  const totalRevenue = active.reduce((s, b) => s + bookingRevenue(b, currency), 0);
   const avgPerSession = active.length > 0 ? Math.round(totalRevenue / active.length) : 0;
   const thisMonthCount = bookingsPerMonth[11]?.value ?? 0;
   const thisMonthRev = revenuePerMonth[11]?.value ?? 0;

@@ -1,7 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { BookingForm } from "@/components/BookingForm";
-import { publicServices, SERVICE_AREAS } from "@/lib/services";
 
 export const metadata: Metadata = {
   title: "Reserve a Session",
@@ -10,7 +7,6 @@ export const metadata: Metadata = {
 };
 
 export default function BookPage() {
-  const services = publicServices();
   const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_BOOKING_URL?.trim();
   return (
     <section className="bg-white">
@@ -43,13 +39,13 @@ export default function BookPage() {
             </div>
           </div>
         ) : (
-          <div className="mt-10">
-            <Suspense fallback={<div className="kh-card">Loading reservation form…</div>}>
-              <BookingForm
-                services={services}
-                areas={SERVICE_AREAS.map((a) => ({ id: a.id, label: a.label }))}
-              />
-            </Suspense>
+          <div className="mt-10 kh-card">
+            <p className="text-[var(--kh-brown)] font-medium">Booking is currently unavailable.</p>
+            <p className="mt-2 text-[var(--kh-brown-soft)]">
+              Calendly has not been configured yet. Please add
+              <code className="mx-1">NEXT_PUBLIC_CALENDLY_BOOKING_URL</code>
+              in production environment variables.
+            </p>
           </div>
         )}
 

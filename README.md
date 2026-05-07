@@ -72,6 +72,7 @@ npm start
 | `/book`            | Calendly embed when `NEXT_PUBLIC_CALENDLY_BOOKING_URL` is set; otherwise the in-app multi-step reservation form. |
 | `/api/bookings`    | `POST` endpoint the form submits to. Validates, persists, notifies.   |
 | `/api/webhooks/calendly` | Receives Calendly events and syncs them into the booking store (for admin calendar/insights). |
+| `/api/admin/calendly-sync` | Admin-triggered Calendly API reconciliation (POST, auth cookie required). |
 | `/admin/login`     | Minimal password sign-in (uses `ADMIN_PASSWORD`).                      |
 | `/admin/bookings`  | Reservations table (cookie-protected).                                 |
 
@@ -139,7 +140,14 @@ Set `NEXT_PUBLIC_CALENDLY_BOOKING_URL` to use Calendly directly on `/book`.
 - If you stay in Calendly mode, enable webhook sync so admin pages stay updated:
   - Webhook URL: `https://your-domain.com/api/webhooks/calendly`
   - Events to subscribe: `invitee.created`, `invitee.canceled`
-  - Set `CALENDLY_WEBHOOK_SIGNING_KEY` in env for signature verification.
+  - Set `CALENDLY_WEBHOOK_SIGNING_KEY` in env for signature verification (recommended).
+  - If no signing key is available, set `CALENDLY_WEBHOOK_TOKEN` and include it in webhook requests.
+
+Set `CALENDLY_API_TOKEN` to enable API reconciliation:
+
+- `/admin/bookings` includes a **Sync Calendly now** button.
+- This pulls recent scheduled events + invitees from Calendly and upserts them into local storage.
+- Use this to backfill historical appointments or recover from transient webhook delivery failures.
 
 ---
 

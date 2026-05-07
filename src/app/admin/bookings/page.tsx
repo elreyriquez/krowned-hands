@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { isAdminRequest, signOut } from "@/lib/auth";
 import { readAll } from "@/lib/bookings";
+import { syncCalendlyRecentBookings } from "@/lib/calendly";
 import { formatServiceAreaLabel } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,12 @@ export default async function AdminBookingsPage() {
     redirect("/admin/login");
   }
 
+  async function handleCalendlySync() {
+    "use server";
+    await syncCalendlyRecentBookings({ lookbackDays: 45, maxEvents: 120 });
+    redirect("/admin/bookings");
+  }
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -27,6 +34,11 @@ export default async function AdminBookingsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <form action={handleCalendlySync}>
+            <button className="kh-btn kh-btn-ghost !py-2 !px-4 !min-h-0 text-sm">
+              Sync Calendly now
+            </button>
+          </form>
           <a
             href="/api/admin/bookings-csv"
             className="kh-btn kh-btn-primary !py-2 !px-4 !min-h-0 text-sm"
@@ -67,6 +79,11 @@ export default async function AdminBookingsPage() {
                     <div className="text-[10px] uppercase tracking-[0.18em] opacity-70 mt-1">
                       {b.id.slice(0, 8)}
                     </div>
+                    {b.source ? (
+                      <div className="mt-2 inline-flex rounded-full border border-[var(--kh-line)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--kh-brown-soft)]">
+                        {b.source}
+                      </div>
+                    ) : null}
                   </td>
                   <td className="px-4 py-3">
                     <div className="font-medium text-[var(--kh-brown)]">{b.name}</div>

@@ -69,7 +69,7 @@ function verifyCalendlySignature(rawBody: string, signatureHeader: string): bool
   const signed = `${t}.${rawBody}`;
   const expected = crypto.createHmac("sha256", key).update(signed).digest("hex");
   try {
-    return crypto.timingSafeEqual(Buffer.from(v1), Buffer.from(expected));
+    return crypto.timingSafeEqual(Buffer.from(v1, "hex"), Buffer.from(expected, "hex"));
   } catch {
     return false;
   }
@@ -85,8 +85,32 @@ export async function POST(req: Request) {
   }
 
   const sig = req.headers.get("Calendly-Webhook-Signature") || "";
-  if (!verifyCalendlySignature(raw, sig)) {
-    return NextResponse.json({ message: "Invalid signature." }, { status: 401 });
+  const hasSigningKey = Boolean(process.env.CALENDLY_WEBHOOK_SIGNING_KEY?.trim());
+  if (hasSigningKey) {
+    if (!verifyCalendlySignature(raw, sig)) {
+      return NextResponse.json({ message: "Invalid signature." }, { status: 401 });
+    }
+  } else {
+    // Fallback guard when no signing key is available in Calendly plan/setup.
+    const expectedToken = process.env.CALENDLY_WEBHOOK_TOKEN?.trim();
+    if (expectedToken) {
+      const url = new URL(req.url);
+      const queryToken = url.searchParams.get("token") || "";
+      const headerToken = req.headers.get("x-kh-webhook-token") || "";
+      const provided = headerToken || queryToken;
+      let ok = false;
+      try {
+        ok = Boolean(
+          provided &&
+            crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expectedToken)),
+        );
+      } catch {
+        ok = false;
+      }
+      if (!ok) {
+        return NextResponse.json({ message: "Unauthorized webhook token." }, { status: 401 });
+      }
+    }
   }
 
   const event = body.event;

@@ -49,11 +49,20 @@ export function SiteHeaderMobileNav() {
         />
         <nav
           aria-label="Primary"
-          className="absolute left-0 top-0 z-10 flex h-full min-h-0 w-[min(20rem,88vw)] flex-col gap-1 overflow-y-auto border-r border-[var(--kh-line)] bg-[var(--kh-cream)] p-6 pt-8 shadow-xl"
+          className="pointer-events-none absolute inset-0 z-10 flex h-full min-h-0 w-full flex-col overflow-y-auto bg-[var(--kh-cream)] px-[max(1.25rem,env(safe-area-inset-left))] pb-[max(1.25rem,env(safe-area-inset-bottom))] pr-[max(1.25rem,env(safe-area-inset-right))] pt-[max(2rem,env(safe-area-inset-top))] shadow-xl"
         >
+          <div className="pointer-events-auto mb-6 flex items-start justify-end">
+            <button
+              type="button"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-[var(--kh-brown-soft)] underline decoration-[var(--kh-line)] underline-offset-4 hover:text-[var(--kh-brown)]"
+              onClick={() => setOpen(false)}
+            >
+              Close
+            </button>
+          </div>
           <Link
             href="/"
-            className="mb-4 font-serif text-lg text-[var(--kh-brown)] hover:text-[var(--kh-gold-deep)]"
+            className="pointer-events-auto mb-4 font-serif text-lg text-[var(--kh-brown)] hover:text-[var(--kh-gold-deep)]"
             onClick={() => setOpen(false)}
           >
             Home
@@ -62,7 +71,7 @@ export function SiteHeaderMobileNav() {
             <Link
               key={href}
               href={href}
-              className="rounded-lg px-3 py-3 text-[var(--kh-brown-soft)] transition hover:bg-[color-mix(in_srgb,var(--kh-gold)_14%,transparent)] hover:text-[var(--kh-brown)]"
+              className="pointer-events-auto rounded-lg px-3 py-3 text-[var(--kh-brown-soft)] transition hover:bg-[color-mix(in_srgb,var(--kh-gold)_14%,transparent)] hover:text-[var(--kh-brown)]"
               onClick={() => setOpen(false)}
             >
               {label}

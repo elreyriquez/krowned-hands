@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 
 const LINKS = [
@@ -21,6 +22,55 @@ export function SiteHeaderMobileNav() {
       document.body.style.overflow = prev;
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const drawer =
+    open && typeof document !== "undefined" ? (
+      <div
+        className="fixed inset-0 z-[60]"
+        id="kh-mobile-nav"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
+      >
+        <button
+          type="button"
+          className="absolute inset-0 z-0 bg-[color-mix(in_srgb,var(--kh-brown)_45%,black)] backdrop-blur-sm"
+          aria-label="Close menu"
+          onClick={() => setOpen(false)}
+        />
+        <nav
+          aria-label="Primary"
+          className="absolute left-0 top-0 z-10 flex h-full min-h-0 w-[min(20rem,88vw)] flex-col gap-1 overflow-y-auto border-r border-[var(--kh-line)] bg-[var(--kh-cream)] p-6 pt-8 shadow-xl"
+        >
+          <Link
+            href="/"
+            className="mb-4 font-serif text-lg text-[var(--kh-brown)] hover:text-[var(--kh-gold-deep)]"
+            onClick={() => setOpen(false)}
+          >
+            Home
+          </Link>
+          {LINKS.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="rounded-lg px-3 py-3 text-[var(--kh-brown-soft)] transition hover:bg-[color-mix(in_srgb,var(--kh-gold)_14%,transparent)] hover:text-[var(--kh-brown)]"
+              onClick={() => setOpen(false)}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+    ) : null;
 
   return (
     <div className="md:hidden">
@@ -54,38 +104,7 @@ export function SiteHeaderMobileNav() {
         </svg>
       </button>
 
-      {open ? (
-        <div className="fixed inset-0 z-50" id="kh-mobile-nav" role="dialog" aria-modal="true">
-          <button
-            type="button"
-            className="absolute inset-0 bg-[color-mix(in_srgb,var(--kh-brown)_45%,black)] backdrop-blur-sm"
-            aria-label="Close menu"
-            onClick={() => setOpen(false)}
-          />
-          <nav
-            aria-label="Primary"
-            className="absolute left-0 top-0 flex h-full min-h-0 w-[min(20rem,88vw)] flex-col gap-1 border-r border-[var(--kh-line)] bg-[var(--kh-cream)] p-6 pt-8 shadow-xl"
-          >
-            <Link
-              href="/"
-              className="mb-4 font-serif text-lg text-[var(--kh-brown)] hover:text-[var(--kh-gold-deep)]"
-              onClick={() => setOpen(false)}
-            >
-              Home
-            </Link>
-            {LINKS.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className="rounded-lg px-3 py-3 text-[var(--kh-brown-soft)] transition hover:bg-[color-mix(in_srgb,var(--kh-gold)_14%,transparent)] hover:text-[var(--kh-brown)]"
-                onClick={() => setOpen(false)}
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      ) : null}
+      {drawer ? createPortal(drawer, document.body) : null}
     </div>
   );
 }

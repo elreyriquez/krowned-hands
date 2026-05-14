@@ -30,7 +30,7 @@ export const SERVICES: Service[] = [
     priceJmd: 15000,
     tagline: "Meet your body where it is.",
     description:
-      "A nervous-system-led, full-body session guided in real time by your body's signals. The right starting point for most first visits.",
+      "A nervous-system-led, full-body session guided in real time by your body's signals.",
   },
   {
     id: "krowned-restore-90",

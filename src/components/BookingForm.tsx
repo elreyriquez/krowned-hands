@@ -359,9 +359,6 @@ function StepService({
   return (
     <fieldset>
       <legend className="font-serif text-2xl text-[var(--kh-brown)]">Choose your session</legend>
-      <p className="mt-1 text-[var(--kh-brown-soft)]">
-        Unsure? The Krowned Reset is the right starting point for most first visits.
-      </p>
       <div className="mt-6 grid gap-3">
         {services.map((s) => {
           const selected = s.id === serviceId;

@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { BrandLogo } from "./BrandLogo";
+import { SiteHeaderMobileNav } from "./SiteHeaderMobileNav";
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-[color-mix(in_srgb,var(--kh-cream)_82%,transparent)] border-b border-[var(--kh-line)]">
       <div className="mx-auto max-w-6xl px-5 md:px-8 min-h-[4.75rem] py-2.5 flex items-center justify-between gap-4">
-        <BrandLogo variant="header" />
+        <div className="flex min-w-0 items-center gap-3">
+          <SiteHeaderMobileNav />
+          <BrandLogo variant="header" className="hidden md:inline-flex" />
+        </div>
         <nav aria-label="Primary" className="hidden md:flex items-center gap-8 text-sm text-[var(--kh-brown-soft)]">
           <Link href="/#services" className="hover:text-[var(--kh-brown)]">Services</Link>
           <Link href="/#about" className="hover:text-[var(--kh-brown)]">About</Link>

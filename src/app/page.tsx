@@ -243,7 +243,7 @@ export default function HomePage() {
                 {
                   step: "02",
                   title: "We come to you",
-                  body: "Jordan arrives with the full set-up: table, linens, oils, music. You choose the room. We take care of the rest.",
+                  body: "Jordan arrives with the full set-up: table, oils, and music. You choose the room and provide linens. We take care of the rest.",
                 },
                 {
                   step: "03",
@@ -344,7 +344,7 @@ export default function HomePage() {
               },
               {
                 q: "What do I need to have at home?",
-                a: "Just a private room with enough space for the table (about 7x3 feet) and an outlet nearby. We bring the table, linens, oils, and music.",
+                a: "Just a private room with enough space for the table (about 7x3 feet), an outlet nearby, and clean linens ready. We bring the table, oils, and music.",
               },
               {
                 q: "How do I prepare for my session?",

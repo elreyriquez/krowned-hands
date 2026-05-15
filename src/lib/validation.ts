@@ -56,6 +56,15 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[+()\-.\s\d]{7,}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** Stored in full on krownedhands.com; Calendly sync clamps to 255 per field. */
+export const BOOKING_FIELD_LIMITS = {
+  name: 120,
+  address: 240,
+  addressNotes: 500,
+  areaCustom: 120,
+  message: 2000,
+} as const;
+
 function s(v: unknown): string {
   return typeof v === "string" ? v.trim() : "";
 }
@@ -81,6 +90,23 @@ export function validateBooking(input: BookingInput): ValidationResult {
 
   const address = s(input.address);
   if (address.length < 6) errors.address = "Full service address is required.";
+  else if (address.length > BOOKING_FIELD_LIMITS.address) {
+    errors.address = `Please shorten your address (max ${BOOKING_FIELD_LIMITS.address} characters).`;
+  }
+
+  if (areaCustom.length > BOOKING_FIELD_LIMITS.areaCustom) {
+    errors.areaCustom = `Please shorten this (max ${BOOKING_FIELD_LIMITS.areaCustom} characters).`;
+  }
+
+  const addressNotes = s(input.addressNotes);
+  if (addressNotes.length > BOOKING_FIELD_LIMITS.addressNotes) {
+    errors.addressNotes = `Arrival notes are too long (max ${BOOKING_FIELD_LIMITS.addressNotes} characters).`;
+  }
+
+  const message = s(input.message);
+  if (message.length > BOOKING_FIELD_LIMITS.message) {
+    errors.message = `Please shorten your note (max ${BOOKING_FIELD_LIMITS.message} characters).`;
+  }
 
   const preferredDate = s(input.preferredDate);
   if (!DATE_RE.test(preferredDate)) {
@@ -101,6 +127,9 @@ export function validateBooking(input: BookingInput): ValidationResult {
 
   const name = s(input.name);
   if (name.length < 2) errors.name = "Please share your name.";
+  else if (name.length > BOOKING_FIELD_LIMITS.name) {
+    errors.name = `Please shorten your name (max ${BOOKING_FIELD_LIMITS.name} characters).`;
+  }
 
   const email = s(input.email);
   if (!EMAIL_RE.test(email)) errors.email = "A valid email helps us confirm.";
@@ -134,14 +163,14 @@ export function validateBooking(input: BookingInput): ValidationResult {
       area,
       areaCustom: area === "other" ? areaCustom : undefined,
       address,
-      addressNotes: s(input.addressNotes) || undefined,
+      addressNotes: addressNotes || undefined,
       preferredDate,
       preferredTime,
       preferredWindow,
       name,
       email,
       phone,
-      message: s(input.message) || undefined,
+      message: message || undefined,
       consent: true,
     },
   };

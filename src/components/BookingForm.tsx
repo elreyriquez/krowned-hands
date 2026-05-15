@@ -13,6 +13,7 @@ import {
   type Slot,
 } from "@/lib/availability";
 import { type QuoteCurrency, dualPriceLabels, sessionPriceLine } from "@/lib/pricing";
+import { BOOKING_FIELD_LIMITS } from "@/lib/validation";
 
 type Props = {
   services: Service[];
@@ -602,6 +603,7 @@ function StepWhere({
             type="text"
             className="kh-input"
             placeholder="e.g. Negril, Ocho Rios, Port Antonio, rural St. Ann…"
+            maxLength={BOOKING_FIELD_LIMITS.areaCustom}
             value={form.areaCustom}
             onChange={(e) => update("areaCustom", e.target.value)}
             autoComplete="address-level2"
@@ -621,6 +623,7 @@ function StepWhere({
           autoComplete="street-address"
           className="kh-input"
           placeholder="Street, apt/unit, neighbourhood, city"
+          maxLength={BOOKING_FIELD_LIMITS.address}
           value={form.address}
           onChange={(e) => update("address", e.target.value)}
         />
@@ -634,6 +637,7 @@ function StepWhere({
           id="addressNotes"
           className="kh-textarea"
           placeholder="Gate code, security desk, landmark, parking instructions…"
+          maxLength={BOOKING_FIELD_LIMITS.addressNotes}
           value={form.addressNotes}
           onChange={(e) => update("addressNotes", e.target.value)}
         />
@@ -662,6 +666,7 @@ function StepContact({
             type="text"
             autoComplete="name"
             className="kh-input"
+            maxLength={BOOKING_FIELD_LIMITS.name}
             value={form.name}
             onChange={(e) => update("name", e.target.value)}
           />
@@ -698,6 +703,7 @@ function StepContact({
           id="message"
           className="kh-textarea"
           placeholder="Injuries, preferences, areas to focus or avoid, medical notes…"
+          maxLength={BOOKING_FIELD_LIMITS.message}
           value={form.message}
           onChange={(e) => update("message", e.target.value)}
         />

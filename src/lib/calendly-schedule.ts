@@ -16,6 +16,26 @@ type EventTypeResource = {
 
 const API_BASE = "https://api.calendly.com";
 
+/** Calendly Scheduling API string fields (location, Q&A answers, etc.) max out at 255. */
+export const CALENDLY_MAX_FIELD_LEN = 255;
+
+/** Trim and clamp text before POST /invitees so Calendly does not return 400 "size cannot be greater than 255". */
+export function clampCalendlyText(
+  value: string,
+  max = CALENDLY_MAX_FIELD_LEN,
+  fieldLabel?: string,
+): string {
+  const t = value.trim();
+  if (t.length <= max) return t;
+  if (fieldLabel) {
+    console.warn(
+      `[calendly-schedule] truncated ${fieldLabel} (${t.length} → ${max} chars) for Calendly API`,
+    );
+  }
+  if (max <= 1) return t.slice(0, max);
+  return `${t.slice(0, max - 1).trimEnd()}…`;
+}
+
 export type CalendlyInviteeOutcome =
   | { ok: true; inviteeUri: string; eventUri?: string; startTimeUsed?: string }
   | {
@@ -176,7 +196,7 @@ function buildInviteeLocationPayload(args: {
     const kind = envTrim;
     const loc: Record<string, string> = { kind };
     if (LOCATION_KINDS_NEED_INVITEE_ADDRESS.has(kind) && args.addressLine) {
-      loc.location = args.addressLine;
+      loc.location = clampCalendlyText(args.addressLine, CALENDLY_MAX_FIELD_LEN, "location");
     }
     return loc;
   }
@@ -203,9 +223,18 @@ function buildInviteeLocationPayload(args: {
 
   const loc: Record<string, string> = { kind: chosen };
   if (LOCATION_KINDS_NEED_INVITEE_ADDRESS.has(chosen) && args.addressLine) {
-    loc.location = args.addressLine;
+    loc.location = clampCalendlyText(args.addressLine, CALENDLY_MAX_FIELD_LEN, "location");
   }
   return loc;
+}
+
+/** Address line for Calendly location — exclude free-text health notes (those go in Q&A only). */
+function buildCalendlyLocationLine(data: ValidatedBooking): string {
+  const areaLabel =
+    data.area === "other" && data.areaCustom
+      ? data.areaCustom
+      : data.area.replace(/-/g, " ");
+  return [data.address, areaLabel, data.addressNotes].filter(Boolean).join(" · ");
 }
 
 const BOOKING_FALLBACK_LINE =
@@ -282,9 +311,10 @@ function buildQuestionsAndAnswers(
       answer = BOOKING_FALLBACK_LINE;
     }
 
+    const fieldLabel = `custom_question:${label || q.position}`;
     out.push({
       question: label || `Question ${q.position ?? 0}`,
-      answer: answer.trim(),
+      answer: clampCalendlyText(answer, CALENDLY_MAX_FIELD_LEN, fieldLabel),
       position: q.position ?? 0,
     });
   }
@@ -442,12 +472,10 @@ export async function createInviteeForBooking(
 
   const startTime = slot.startTime;
 
-  const addrLine = [data.address, data.areaCustom, data.addressNotes, data.message]
-    .filter(Boolean)
-    .join(" · ");
+  const locationLine = buildCalendlyLocationLine(data);
 
   const invitee: Record<string, string> = {
-    name: data.name,
+    name: clampCalendlyText(data.name, CALENDLY_MAX_FIELD_LEN, "invitee.name"),
     email: data.email,
     timezone: "America/Jamaica",
   };
@@ -467,7 +495,7 @@ export async function createInviteeForBooking(
   const locationPayload = buildInviteeLocationPayload({
     resource: eventTypeResource,
     envKindRaw: process.env.CALENDLY_BOOKING_LOCATION_KIND,
-    addressLine: addrLine || data.address,
+    addressLine: locationLine || data.address,
   });
   if (locationPayload) body.location = locationPayload;
 

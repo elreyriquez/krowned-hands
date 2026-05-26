@@ -379,7 +379,15 @@ function StepService({
                 value={s.id}
                 checked={selected}
                 onChange={() => onChange(s.id)}
-                className="mt-1.5 accent-[var(--kh-brown)]"
+                className="sr-only"
+              />
+              <span
+                aria-hidden
+                className={`mt-1.5 h-5 w-5 shrink-0 rounded-full border-2 transition-colors ${
+                  selected
+                    ? "border-[var(--kh-gold)] bg-[var(--kh-gold)]"
+                    : "border-[var(--kh-line)] bg-white"
+                }`}
               />
               <div className="flex-1">
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">

@@ -63,46 +63,10 @@ export default function BookPage() {
               Deposits are non-refundable, except in the event of a fault on the service
               provider&rsquo;s end.
             </li>
+            <li>
+              Jordan will share payment instructions when your reservation is confirmed.
+            </li>
           </ul>
-          <h3 className="mt-8 font-serif text-lg text-[var(--kh-brown)]">Payment details</h3>
-          <dl className="mt-4 grid gap-3 text-sm text-[var(--kh-brown-soft)] sm:grid-cols-2 sm:gap-x-10">
-            <div>
-              <dt className="uppercase tracking-[0.14em] text-[11px] text-[var(--kh-gold-deep)]">
-                Bank
-              </dt>
-              <dd className="mt-1 text-[var(--kh-ink)]">Scotiabank</dd>
-            </div>
-            <div>
-              <dt className="uppercase tracking-[0.14em] text-[11px] text-[var(--kh-gold-deep)]">
-                Account name
-              </dt>
-              <dd className="mt-1 text-[var(--kh-ink)]">Jordan King</dd>
-            </div>
-            <div>
-              <dt className="uppercase tracking-[0.14em] text-[11px] text-[var(--kh-gold-deep)]">
-                JMD savings
-              </dt>
-              <dd className="mt-1 font-mono text-[var(--kh-ink)] tabular-nums">000422950</dd>
-            </div>
-            <div>
-              <dt className="uppercase tracking-[0.14em] text-[11px] text-[var(--kh-gold-deep)]">
-                USD savings
-              </dt>
-              <dd className="mt-1 font-mono text-[var(--kh-ink)] tabular-nums">000422810</dd>
-            </div>
-            <div>
-              <dt className="uppercase tracking-[0.14em] text-[11px] text-[var(--kh-gold-deep)]">
-                Transit
-              </dt>
-              <dd className="mt-1 font-mono text-[var(--kh-ink)] tabular-nums">18465</dd>
-            </div>
-            <div>
-              <dt className="uppercase tracking-[0.14em] text-[11px] text-[var(--kh-gold-deep)]">
-                Branch
-              </dt>
-              <dd className="mt-1 text-[var(--kh-ink)]">UWI</dd>
-            </div>
-          </dl>
         </div>
       </div>
     </section>

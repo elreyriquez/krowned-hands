@@ -71,7 +71,11 @@ export function SiteHeaderMobileNav() {
             <Link
               key={href}
               href={href}
-              className="pointer-events-auto rounded-lg px-3 py-3 text-[var(--kh-brown-soft)] transition hover:bg-[color-mix(in_srgb,var(--kh-gold)_14%,transparent)] hover:text-[var(--kh-brown)]"
+              className={
+                href === "/book"
+                  ? "pointer-events-auto mt-4 kh-btn kh-btn-primary w-full justify-center text-center"
+                  : "pointer-events-auto rounded-lg px-3 py-3 text-[var(--kh-brown-soft)] transition hover:bg-[color-mix(in_srgb,var(--kh-gold)_14%,transparent)] hover:text-[var(--kh-brown)]"
+              }
               onClick={() => setOpen(false)}
             >
               {label}

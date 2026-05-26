@@ -18,9 +18,6 @@ export function SiteHeader() {
             Reserve a Session
           </Link>
         </nav>
-        <Link href="/book" className="md:hidden kh-btn kh-btn-primary !py-2 !px-4 !min-h-0 text-sm">
-          Reserve
-        </Link>
       </div>
     </header>
   );
